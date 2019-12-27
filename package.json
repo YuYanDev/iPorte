@@ -4,7 +4,8 @@
   "description": "A Fast 🚀 and Lightweight🎽 API Gateway",
   "main": "main.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "dev:rc": "node scripts/dev-register-center.js"
   },
   "repository": {
     "type": "git",
@@ -19,11 +20,17 @@
   "bugs": {
     "url": "https://github.com/YuYanDev/iPorte/issues"
   },
-  "homepage": "https://github.com/YuYanDev/iPorte#readme"
+  "homepage": "https://github.com/YuYanDev/iPorte#readme",
   "devDependencies": {
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0"
   },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "koa": "^2.11.0",
+    "koa-router": "^7.4.0",
+    "koa-session": "^5.12.3"
+  }
 }
