@@ -1,0 +1,29 @@
+{
+  "name": "iporte",
+  "version": "0.0.1",
+  "description": "A Fast 🚀 and Lightweight🎽 API Gateway",
+  "main": "main.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YuYanDev/iPorte.git"
+  },
+  "keywords": [
+    "api",
+    "gate"
+  ],
+  "author": "YuYan",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/YuYanDev/iPorte/issues"
+  },
+  "homepage": "https://github.com/YuYanDev/iPorte#readme"
+  "devDependencies": {
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0"
+  },
+}
