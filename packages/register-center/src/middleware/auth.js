@@ -1,8 +1,7 @@
 import githubOAuth2 from '../plugin/github-oauth2'
 
-const OAuth2 = () => {
+const Auth = () => {
   return async (ctx, next) => {
-    // console.log(ctx.session)
     if(ctx.session && ctx.session.id){
       next()
     } else {
@@ -12,4 +11,4 @@ const OAuth2 = () => {
   };
 };
 
-export default OAuth2;
+export default Auth;

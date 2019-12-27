@@ -32,6 +32,7 @@ const githubOAuth2 = async ctx => {
       );
       if (userData.data) {
         ctx.session.id = userData.data.id
+        ctx.session.username = userData.data.name
         console.log(userData.data)
         ctx.redirect("/");
       } else {

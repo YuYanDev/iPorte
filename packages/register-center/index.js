@@ -1,6 +1,7 @@
 import Koa from "koa";
 import Router from 'koa-router'
 import Session from 'koa-session'
+import apiRouter from './src/router/api'
 import auth from './src/middleware/auth'
 
 const SESSION_CONFIG = {
@@ -14,15 +15,19 @@ const SESSION_CONFIG = {
  };
 
 const app = new Koa();
-const router = new Router
+const router = new Router();
+
 app.keys = ['WDNMD'];
 
 app.use(Session(SESSION_CONFIG, app));
 
 app.use(auth())
 
+router.use('/api', apiRouter.routes(), apiRouter.allowedMethods())
+app.use(router.routes()).use(router.allowedMethods())
+
 app.use(ctx => {
   ctx.body = "Hello Koa";
 });
 
-app.listen(3000);
+app.listen(8080);
