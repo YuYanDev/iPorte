@@ -1,0 +1,43 @@
+[
+  {
+    "id": 1,
+    "name": "主站API入口",
+    "domain": "api.lolita.im",
+    "rule": [
+      {
+        "id": "1_1",
+        "name": "注册中心转发",
+        "suffix": "/register-center",
+        "rewrite": true,
+        "rewrite_rule": "^",
+        "type": "Reverse Proxy",
+        "target": "https://register-center.k8s.alleysakura.com"
+      },
+      {
+        "id": "1_2",
+        "name": "运维监控",
+        "suffix": "/bot",
+        "rewrite": true,
+        "rewrite_rule": "^",
+        "type": "Reverse Proxy",
+        "target": "https://bot.gate.alleysakura.com"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "主站入口",
+    "domain": "lolita.im",
+    "rule": [
+      {
+        "id": "2_1",
+        "name": "应用反向代理",
+        "suffix": "/",
+        "rewrite": false,
+        "rewrite_rule": "",
+        "type": "Reverse Proxy",
+        "target": "https://static.alleysakura.com"
+      }
+    ]
+  }
+]

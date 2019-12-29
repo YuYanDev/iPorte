@@ -11,3 +11,20 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.error-text {
+  color: #f5222d;
+}
+
+.error-text:hover {
+  color: #f5222d;
+}
+
+.warn-text {
+  color: #faad14;
+}
+
+.warn-text:hover {
+  color: #faad14;
+}
+

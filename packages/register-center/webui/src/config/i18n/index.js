@@ -1,0 +1,50 @@
+const zh_CN = {
+  "now":"zh_CN",
+  "common.text.modify":"修改",
+  "common.text.drop":"下线",
+  "common.text.stop":"暂停",
+  "common.nav.menu.application": "应用列表",
+  "common.nav.menu.setting": "设置",
+  "application.body.add_domain": "添加域名",
+  "application.table.head.domain_id": "域名ID",
+  "application.table.head.name": "名称",
+  "application.table.head.domain": "域名",
+  "application.table.head.rule_count": "规则数量",
+  "application.table.head.rule_id": "规则ID",
+  "application.table.head.rule_name": "规则名称",
+  "application.table.head.suffix": "后缀",
+  "application.table.head.type": "类型",
+  "application.table.head.rewrite": "目录重写",
+  "application.table.head.target": "转发地址",
+  "application.table.head.domain_operate": "域名操作",
+  "application.table.head.rule_operate": "规则操作",
+  "application.table.add_rule": "添加规则",
+};
+
+const en_US = {
+  "now":"en_US",
+  "common.text.modify":"Modify",
+  "common.text.drop":"Drop",
+  "common.text.stop":"Stop",
+  "common.nav.menu.application": "Applications",
+  "common.nav.menu.setting": "Setting",
+  "application.body.add_domain": "Add Domain",
+  "application.table.head.domain_id": "Domain ID",
+  "application.table.head.name": "Name",
+  "application.table.head.domain": "Domain",
+  "application.table.head.rule_count": "Rule Count",
+  "application.table.head.rule_id": "Rule ID",
+  "application.table.head.rule_name": "Rule Name",
+  "application.table.head.suffix": "Suffix",
+  "application.table.head.type": "Type",
+  "application.table.head.rewrite": "Rewrite",
+  "application.table.head.target": "Target",
+  "application.table.head.domain_operate": "Domain Operate",
+  "application.table.head.rule_operate": "Rule Operate",
+  "application.table.add_rule": "Add Rule",
+};
+
+export default {
+  zh_CN,
+  en_US
+}
