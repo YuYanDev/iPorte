@@ -12,9 +12,9 @@ const redirectGithub = ctx => {
 
 const githubOAuth2 = async ctx => {
   const reqUrl = ctx.request.url;
-  if (reqUrl.indexOf("auth/error") !== -1) {
+  if (reqUrl.indexOf("/auth/error") !== -1) {
     return;
-  } else if (reqUrl.indexOf("auth/github_callback?code") !== -1) {
+  } else if (reqUrl.indexOf("/auth/github_callback?code") !== -1) {
     const params = {
       client_id: ClientID,
       client_secret: ClientSecret,

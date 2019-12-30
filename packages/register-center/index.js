@@ -1,33 +1,79 @@
 import Koa from "koa";
-import Router from 'koa-router'
-import Session from 'koa-session'
-import apiRouter from './src/router/api'
-import auth from './src/middleware/auth'
+import Router from "koa-router";
+import Session from "koa-session";
+import path from "path";
+import loadConfigObjFromToml from "./service/readToml";
+import startRedis from "./service/startRedis";
+import apiRouter from "./webservice/handler/api";
+import auth from "./webService/middleware/auth";
+import Logger from './webservice/middleware/logger'
+import redisDBMiddleWare from './webservice/middleware/redisDB'
+import { SESSION_CONFIG } from "./constants";
 
-const SESSION_CONFIG = {
-    key: 'iporte:sess',   //cookie key (default is koa:sess)
-    maxAge: 86400000,  // cookie的过期时间 maxAge in ms (default is 1 days)
-    overwrite: true,  //是否可以overwrite    (默认default true)
-    httpOnly: true, //cookie是否只有服务器端可以访问 httpOnly or not (default true)
-    signed: true,   //签名默认true
-    rolling: false,  //在每次请求时强行设置cookie，这将重置cookie过期时间（默认：false）
-    renew: false,  //(boolean) renew session when session is nearly expired,
- };
+class RegisterCenter {
+  constructor() {
+    this.start();
+  }
 
-const app = new Koa();
-const router = new Router();
+  /**
+   * Init status
+   */
+  initConst() {
+    this.webService = null;
+    this.webServiceRouter = null;
+    this.config = null;
+    this.db = null;
+  }
 
-app.keys = ['WDNMD'];
+  /**
+   * Read Register Center config from toml file
+   */
+  async loadRegisterCenterConfig() {
+    this.config = await loadConfigObjFromToml(
+      path.join(__dirname, "config.toml")
+    );
+  }
 
-app.use(Session(SESSION_CONFIG, app));
+  startRedisService() {
+    this.db = startRedis(this.config.redis);
+  }
 
-app.use(auth())
+  /**
+   * load Web Service (Koa Server)
+   */
+  loadWebService() {
+    this.webService = new Koa();
+    this.webServiceRouter = new Router();
+    this.webService.keys = ["WDNMD"];
 
-router.use('/api', apiRouter.routes(), apiRouter.allowedMethods())
-app.use(router.routes()).use(router.allowedMethods())
+    this.webService.use(Session(SESSION_CONFIG, this.webService));
+    this.webService.use(Logger())
+    this.webService.use(redisDBMiddleWare(this.db))
+    this.webService.use(auth());
 
-app.use(ctx => {
-  ctx.body = "Hello Koa";
-});
+    this.webServiceRouter.use(
+      "/api",
+      apiRouter.routes(),
+      apiRouter.allowedMethods()
+    );
+    this.webService
+      .use(this.webServiceRouter.routes())
+      .use(this.webServiceRouter.allowedMethods());
 
-app.listen(8080);
+    this.webService.use(ctx => {
+      ctx.body = "Hello Koa";
+    });
+
+    this.webService.listen(8080);
+  }
+
+  async start() {
+    await this.initConst();
+    await this.loadRegisterCenterConfig();
+    await this.startRedisService()
+    console.log("Config:", this.config);
+    this.loadWebService();
+  }
+}
+
+new RegisterCenter();

@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "test",
-    "dev:rc": "node scripts/dev-register-center.js"
+    "dev:rc": "nodemon scripts/dev-register-center.js"
   },
   "repository": {
     "type": "git",
@@ -29,9 +29,15 @@
   },
   "dependencies": {
     "axios": "^0.19.0",
+    "chalk": "^3.0.0",
+    "concat-stream": "^2.0.0",
     "koa": "^2.11.0",
     "koa-json": "^2.0.2",
     "koa-router": "^7.4.0",
-    "koa-session": "^5.12.3"
+    "koa-session": "^5.12.3",
+    "moment": "^2.24.0",
+    "path": "^0.12.7",
+    "redis": "^2.8.0",
+    "toml": "^3.0.0"
   }
 }

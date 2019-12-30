@@ -16,8 +16,12 @@ class Ajax {
       ({ data = {} }) => {
         // 提前销毁重复请求
         this.destroy(url)
+        console.log(data.code)
         // 业务状态码及URL校验
         if (data.code !== 200) {
+          if(data.code === 401){
+            window.location.href = '/auth/login'
+          }
           let msg = data.message
           if (!msg) {
             msg = '数据获取异常'
