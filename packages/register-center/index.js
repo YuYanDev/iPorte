@@ -1,13 +1,14 @@
 import Koa from "koa";
+import BodyParser from "koa-bodyparser"
 import Router from "koa-router";
 import Session from "koa-session";
 import path from "path";
 import loadConfigObjFromToml from "./service/readToml";
 import startRedis from "./service/startRedis";
 import apiRouter from "./webservice/handler/api";
-import auth from "./webService/middleware/auth";
+import Auth from "./webService/middleware/auth";
 import Logger from './webservice/middleware/logger'
-import redisDBMiddleWare from './webservice/middleware/redisDB'
+import RedisDBMiddleWare from './webservice/middleware/redisDB'
 import { SESSION_CONFIG } from "./constants";
 
 class RegisterCenter {
@@ -46,10 +47,12 @@ class RegisterCenter {
     this.webServiceRouter = new Router();
     this.webService.keys = ["WDNMD"];
 
+    /** MiddleWare */
+    this.webService.use(BodyParser())
     this.webService.use(Session(SESSION_CONFIG, this.webService));
     this.webService.use(Logger())
-    this.webService.use(redisDBMiddleWare(this.db))
-    this.webService.use(auth());
+    this.webService.use(RedisDBMiddleWare(this.db))
+    this.webService.use(Auth());
 
     this.webServiceRouter.use(
       "/api",
@@ -72,7 +75,7 @@ class RegisterCenter {
     await this.loadRegisterCenterConfig();
     await this.startRedisService()
     console.log("Config:", this.config);
-    this.loadWebService();
+    await this.loadWebService();
   }
 }
 

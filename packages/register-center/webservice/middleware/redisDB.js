@@ -1,7 +1,7 @@
 const redisDB = db => {
   return async (ctx, next) => {
     ctx.DB = db
-    next();
+    await next();
   };
 };
 
