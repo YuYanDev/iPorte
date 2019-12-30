@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Input, Icon, Select } from "antd";
+import { Form, Select } from "antd";
 import { connect } from "react-redux";
 import language from "../../../img/language.svg";
 import "./index.scss";
@@ -17,12 +17,13 @@ class SettingForm extends React.Component {
       text: "English"
     }
   ];
-  
+
   formItemLayout = {
-    labelCol: { span: 1 },
+    labelCol: { span: 1 }
   };
 
   changeLanguage = event => {
+    localStorage.setItem("user_lang", event);
     this.props.setLang(event);
   };
 
@@ -32,7 +33,7 @@ class SettingForm extends React.Component {
     ));
     return (
       <Form {...this.formItemLayout}>
-        <Form.Item label={<img src={language} />} style={{ textAlign: "left" }}>
+        <Form.Item label={<img src={language} alt="language"/>} style={{ textAlign: "left" }}>
           <Select
             defaultValue={this.props.lang["now"]}
             style={{ width: 120 }}

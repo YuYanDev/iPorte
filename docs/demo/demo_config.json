@@ -3,11 +3,13 @@
     "id": 1,
     "name": "主站API入口",
     "domain": "api.lolita.im",
+    "status": "Running",
     "rule": [
       {
         "id": "1_1",
         "name": "注册中心转发",
         "suffix": "/register-center",
+        "status": "Running",
         "rewrite": true,
         "rewrite_rule": "^",
         "type": "Reverse Proxy",
@@ -17,6 +19,7 @@
         "id": "1_2",
         "name": "运维监控",
         "suffix": "/bot",
+        "status": "Stop",
         "rewrite": true,
         "rewrite_rule": "^",
         "type": "Reverse Proxy",
@@ -28,11 +31,13 @@
     "id": 2,
     "name": "主站入口",
     "domain": "lolita.im",
+    "status": "Stop",
     "rule": [
       {
         "id": "2_1",
         "name": "应用反向代理",
         "suffix": "/",
+        "status": "Stop",
         "rewrite": false,
         "rewrite_rule": "",
         "type": "Reverse Proxy",

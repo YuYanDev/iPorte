@@ -1,9 +1,14 @@
 import { createStore } from "redux";
-import langConfig from '../config/i18n'
+import langConfig from "../config/i18n";
 
 const initialState = {
   navbarkey: "application",
-  lang: langConfig['zh_CN']
+  lang:
+    langConfig[
+      localStorage.getItem("user_lang") !== null
+        ? localStorage.getItem("user_lang")
+        : "en_US"
+    ]
 };
 
 const setnavbarkey = (state, action) => {
@@ -12,14 +17,14 @@ const setnavbarkey = (state, action) => {
 
 const setLang = (state, action) => {
   return { ...state, lang: langConfig[action.lang] };
-}
+};
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case "SET_NAVBAR_KEY":
       return setnavbarkey(state, action);
     case "SET_LANG":
-      return setLang(state, action)
+      return setLang(state, action);
     default:
       return state;
   }
