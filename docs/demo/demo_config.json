@@ -1,48 +1,56 @@
-[
-  {
-    "id": 1,
-    "name": "主站API入口",
-    "domain": "api.lolita.im",
-    "status": "Running",
-    "rule": [
-      {
-        "id": "1_1",
-        "name": "注册中心转发",
-        "suffix": "/register-center",
-        "status": "Running",
-        "rewrite": true,
-        "rewrite_rule": "^",
-        "type": "Reverse Proxy",
-        "target": "https://register-center.k8s.alleysakura.com"
-      },
-      {
-        "id": "1_2",
-        "name": "运维监控",
-        "suffix": "/bot",
-        "status": "Stop",
-        "rewrite": true,
-        "rewrite_rule": "^",
-        "type": "Reverse Proxy",
-        "target": "https://bot.gate.alleysakura.com"
-      }
-    ]
-  },
-  {
-    "id": 2,
-    "name": "主站入口",
-    "domain": "lolita.im",
-    "status": "Stop",
-    "rule": [
-      {
-        "id": "2_1",
-        "name": "应用反向代理",
-        "suffix": "/",
-        "status": "Stop",
-        "rewrite": false,
-        "rewrite_rule": "",
-        "type": "Reverse Proxy",
-        "target": "https://static.alleysakura.com"
-      }
-    ]
-  }
-]
+{
+  "application_incremental": 2,
+  "application_total": 2,
+  "applications": [
+    {
+      "id": 1,
+      "name": "主站API入口",
+      "domain": "api.lolita.im",
+      "status": 1,
+      "rule_incremental": 2,
+      "rule_total": 2,
+      "rule": [
+        {
+          "id": 1,
+          "name": "注册中心转发",
+          "suffix": "/register-center",
+          "status": 1,
+          "rewrite": true,
+          "rewrite_rule": "^",
+          "type": "Reverse Proxy",
+          "target": "https://register-center.k8s.alleysakura.com"
+        },
+        {
+          "id": 2,
+          "name": "运维监控",
+          "suffix": "/bot",
+          "status": 0,
+          "rewrite": true,
+          "rewrite_rule": "^",
+          "type": "Reverse Proxy",
+          "target": "https://bot.gate.alleysakura.com"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "主站入口",
+      "domain": "lolita.im",
+      "status": 0,
+      "rule_incremental": 1,
+      "rule_total": 1,
+      "rule": [
+        {
+          "id": 1,
+          "name": "应用反向代理",
+          "suffix": "/",
+          "status": 0,
+          "rewrite": false,
+          "rewrite_rule": "",
+          "type": "Reverse Proxy",
+          "target": "https://static.alleysakura.com"
+        }
+      ]
+    }
+  ]
+}

@@ -37,6 +37,7 @@
     "koa-json": "^2.0.2",
     "koa-router": "^7.4.0",
     "koa-session": "^5.12.3",
+    "loadsh": "0.0.4",
     "moment": "^2.24.0",
     "path": "^0.12.7",
     "redis": "^2.8.0",

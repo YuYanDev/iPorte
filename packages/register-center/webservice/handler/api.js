@@ -1,11 +1,15 @@
 import Router from "koa-router";
 import Json from "koa-json";
+import _ from "loadsh";
 import {
-  queryApplicationsList,
-  queryApplicationsIncrementalStatistics,
-  addApplications,
-  addApplicationsIncrementalStatistics
+  getApplicationsList,
+  setApplicationsList
 } from "../service/applications";
+
+const checkDomainDuplicates = (domainList = [], domain = "") => {
+  let res = domainList.find(x => x.domain === domain);
+  return res === undefined ? false : true;
+};
 
 let api = new Router();
 api.use(Json());
@@ -23,7 +27,7 @@ api.get("/sys/user-info", async ctx => {
 });
 
 api.get("/application/list", async ctx => {
-  let data = await queryApplicationsList(ctx);
+  let data = await getApplicationsList(ctx);
   ctx.body = {
     code: 200,
     success: true,
@@ -32,29 +36,101 @@ api.get("/application/list", async ctx => {
 });
 
 api.post("/application/add", async ctx => {
-  try {
-    let IncrementalStatistics = await queryApplicationsIncrementalStatistics(
-      ctx
-    );
-    let pushData = {
-      id: IncrementalStatistics + 1,
-      status: 1,
-      ...ctx.request.body
-    };
-    await addApplications(ctx, pushData);
-    await addApplicationsIncrementalStatistics(ctx);
+  const reqObj = ctx.request.body;
+  if (!reqObj.name || !reqObj.domain) {
     ctx.body = {
-      code: 200,
-      success: true
+      code: 400,
+      success: false,
+      message: "Field is missing"
     };
-  } catch (e) {
-    ctx.Logger.error("/api/application/add false");
+  }
+  try {
+    let data = await getApplicationsList(ctx);
+    if (data) {
+      let newData = _.cloneDeep(data);
+      // Check Domain Duplicates
+      if (checkDomainDuplicates(data.applications, reqObj.domain)) {
+        ctx.body = {
+          code: 400,
+          success: false,
+          message: "Duplicate domain name"
+        };
+        return;
+      }
+
+      let pushData = {
+        id: data.applications.length + 1,
+        status: 1,
+        rule_incremental_statistics: 0,
+        rule_total: 0,
+        rule: [],
+        ...ctx.request.body
+      };
+
+      newData.application_total = data.applications.length + 1;
+      newData.application_incremental = data.application_incremental + 1;
+      newData.applications.push(pushData);
+      await setApplicationsList(ctx, newData);
+      // TODO: Add Domain Broadcast
+      ctx.body = {
+        code: 200,
+        success: true,
+        message: newData
+      };
+    } else {
+      ctx.body = {
+        code: 500,
+        success: false,
+        message: "Database error"
+      };
+    }
+  } catch (E) {
     ctx.body = {
       code: 500,
       success: false,
-      message: String(e)
+      message: String(E)
     };
   }
+});
+
+api.post("/application/edit", async ctx => {
+  ctx.body = {
+    code: 200,
+    success: true,
+    message: "/application/edit"
+  };
+});
+
+api.post("/application/delete", async ctx => {
+  ctx.body = {
+    code: 200,
+    success: true,
+    message: "/application/delete"
+  };
+});
+
+api.post("/application/:id/addrule", async ctx => {
+  ctx.body = {
+    code: 200,
+    success: true,
+    message: "/application/id/addrule"
+  };
+});
+
+api.post("/application/:id/editrule", async ctx => {
+  ctx.body = {
+    code: 200,
+    success: true,
+    message: "/application/id/editrule"
+  };
+});
+
+api.post("/application/:id/deleterule", async ctx => {
+  ctx.body = {
+    code: 200,
+    success: true,
+    message: "/application/:id/deleterule"
+  };
 });
 
 export default api;
