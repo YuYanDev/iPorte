@@ -11,6 +11,50 @@ const checkDomainDuplicates = (domainList = [], domain = "") => {
   return res === undefined ? false : true;
 };
 
+const changeApplicationInfoById = (originalData = {}, changeData = {}) => {
+  return originalData.applications.map(e => {
+    if (e.id === changeData.id) {
+      let newE = _.cloneDeep(e);
+      newE.name = changeData.name ? changeData.name : e.name;
+      newE.domain =
+        changeData.domain &&
+        !checkDomainDuplicates(originalData.applications, changeData.domain)
+          ? changeData.domain
+          : e.domain;
+      return newE;
+    } else {
+      return e;
+    }
+  });
+};
+
+const changeApplicationStatusById = (
+  originalData = {},
+  id = null,
+  status = 0
+) => {
+  return originalData.applications.map(e => {
+    if (e.id === id) {
+      let newE = _.cloneDeep(e);
+      newE.status = status;
+      return newE;
+    } else {
+      return e;
+    }
+  });
+};
+
+const deleteApplicationById = (data, id) => {
+  let afterApplication = [];
+  data.applications.forEach(e => {
+    if (e.id === id) {
+    } else {
+      afterApplication.push(e);
+    }
+  });
+  return afterApplication;
+};
+
 let api = new Router();
 api.use(Json());
 
@@ -43,6 +87,7 @@ api.post("/application/add", async ctx => {
       success: false,
       message: "Field is missing"
     };
+    return;
   }
   try {
     let data = await getApplicationsList(ctx);
@@ -60,22 +105,22 @@ api.post("/application/add", async ctx => {
 
       let pushData = {
         id: data.applications.length + 1,
+        ...reqObj,
         status: 1,
         rule_incremental_statistics: 0,
         rule_total: 0,
-        rule: [],
-        ...ctx.request.body
+        rule: []
       };
 
       newData.application_total = data.applications.length + 1;
       newData.application_incremental = data.application_incremental + 1;
-      newData.applications.push(pushData);
+      newData.applications.unshift(pushData);
       await setApplicationsList(ctx, newData);
       // TODO: Add Domain Broadcast
       ctx.body = {
         code: 200,
         success: true,
-        message: newData
+        message: "add success"
       };
     } else {
       ctx.body = {
@@ -94,19 +139,125 @@ api.post("/application/add", async ctx => {
 });
 
 api.post("/application/edit", async ctx => {
-  ctx.body = {
-    code: 200,
-    success: true,
-    message: "/application/edit"
-  };
+  const reqObj = ctx.request.body;
+  if (!reqObj.id) {
+    ctx.body = {
+      code: 400,
+      success: false,
+      message: "Field is missing"
+    };
+    return;
+  }
+  try {
+    let data = await getApplicationsList(ctx);
+    if (data) {
+      let newData = _.cloneDeep(data);
+      let newApplicationData = changeApplicationInfoById(newData, reqObj);
+      newData.applications = newApplicationData;
+      await setApplicationsList(ctx, newData);
+      // TODO: edit Domain Broadcast
+      ctx.body = {
+        code: 200,
+        success: true,
+        message: "edit success"
+      };
+    } else {
+      ctx.body = {
+        code: 500,
+        success: false,
+        message: "Database error"
+      };
+    }
+  } catch (E) {
+    ctx.body = {
+      code: 500,
+      success: false,
+      message: String(E)
+    };
+  }
+});
+
+api.post("/application/changestatus", async ctx => {
+  const reqObj = ctx.request.body;
+  if (!reqObj.id || !(reqObj.status === 1 || reqObj.status === 0)) {
+    ctx.body = {
+      code: 400,
+      success: false,
+      message: "Field is missing"
+    };
+    return;
+  }
+  try {
+    let data = await getApplicationsList(ctx);
+    if (data) {
+      let newData = _.cloneDeep(data);
+      let newApplicationData = changeApplicationStatusById(
+        newData,
+        reqObj.id,
+        reqObj.status
+      );
+      newData.applications = newApplicationData;
+      await setApplicationsList(ctx, newData);
+      // TODO: updown Domain Broadcast
+      ctx.body = {
+        code: 200,
+        success: true,
+        message: "changestatus success"
+      };
+    } else {
+      ctx.body = {
+        code: 500,
+        success: false,
+        message: "Database error"
+      };
+    }
+  } catch (E) {
+    ctx.body = {
+      code: 500,
+      success: false,
+      message: String(E)
+    };
+  }
 });
 
 api.post("/application/delete", async ctx => {
-  ctx.body = {
-    code: 200,
-    success: true,
-    message: "/application/delete"
-  };
+  const reqObj = ctx.request.body;
+  if (!reqObj.id) {
+    ctx.body = {
+      code: 400,
+      success: false,
+      message: "Field is missing"
+    };
+    return;
+  }
+  try {
+    let data = await getApplicationsList(ctx);
+    if (data) {
+      let newData = _.cloneDeep(data);
+      let newApplicationData = deleteApplicationById(newData, reqObj.id);
+      newData.applications = newApplicationData;
+      newData.application_total = data.application_total - 1;
+      await setApplicationsList(ctx, newData);
+      // TODO: updown Domain Broadcast
+      ctx.body = {
+        code: 200,
+        success: true,
+        message: "delete success"
+      };
+    } else {
+      ctx.body = {
+        code: 500,
+        success: false,
+        message: "Database error"
+      };
+    }
+  } catch (E) {
+    ctx.body = {
+      code: 500,
+      success: false,
+      message: String(E)
+    };
+  }
 });
 
 api.post("/application/:id/addrule", async ctx => {
@@ -114,6 +265,14 @@ api.post("/application/:id/addrule", async ctx => {
     code: 200,
     success: true,
     message: "/application/id/addrule"
+  };
+});
+
+api.post("/application/changerulestatus", async ctx => {
+  ctx.body = {
+    code: 200,
+    success: true,
+    message: "/application/changerulestatus"
   };
 });
 
