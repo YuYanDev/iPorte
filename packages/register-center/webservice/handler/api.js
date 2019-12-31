@@ -1,59 +1,12 @@
 import Router from "koa-router";
 import Json from "koa-json";
-import _ from "loadsh";
+import { getApplicationsList, setApplicationsList } from "../dao/applications";
 import {
-  getApplicationsList,
-  setApplicationsList
-} from "../dao/applications";
-
-const checkDomainDuplicates = (domainList = [], domain = "") => {
-  let res = domainList.find(x => x.domain === domain);
-  return res === undefined ? false : true;
-};
-
-const changeApplicationInfoById = (originalData = {}, changeData = {}) => {
-  return originalData.applications.map(e => {
-    if (e.id === changeData.id) {
-      let newE = _.cloneDeep(e);
-      newE.name = changeData.name ? changeData.name : e.name;
-      newE.domain =
-        changeData.domain &&
-        !checkDomainDuplicates(originalData.applications, changeData.domain)
-          ? changeData.domain
-          : e.domain;
-      return newE;
-    } else {
-      return e;
-    }
-  });
-};
-
-const changeApplicationStatusById = (
-  originalData = {},
-  id = null,
-  status = 0
-) => {
-  return originalData.applications.map(e => {
-    if (e.id === id) {
-      let newE = _.cloneDeep(e);
-      newE.status = status;
-      return newE;
-    } else {
-      return e;
-    }
-  });
-};
-
-const deleteApplicationById = (data, id) => {
-  let afterApplication = [];
-  data.applications.forEach(e => {
-    if (e.id === id) {
-    } else {
-      afterApplication.push(e);
-    }
-  });
-  return afterApplication;
-};
+  checkDomainDuplicates,
+  changeApplicationInfoById,
+  changeApplicationStatusById,
+  deleteApplicationById
+} from "../service/applications";
 
 let api = new Router();
 api.use(Json());
