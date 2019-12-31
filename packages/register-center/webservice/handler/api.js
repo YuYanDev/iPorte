@@ -4,7 +4,7 @@ import _ from "loadsh";
 import {
   getApplicationsList,
   setApplicationsList
-} from "../service/applications";
+} from "../dao/applications";
 
 const checkDomainDuplicates = (domainList = [], domain = "") => {
   let res = domainList.find(x => x.domain === domain);
