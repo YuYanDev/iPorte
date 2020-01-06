@@ -1,14 +1,17 @@
 import Koa from "koa";
-import BodyParser from "koa-bodyparser"
+import BodyParser from "koa-bodyparser";
 import Router from "koa-router";
 import Session from "koa-session";
 import path from "path";
+import http from "http";
+import socketio from "socket.io";
 import loadConfigObjFromToml from "./service/readToml";
 import startRedis from "./service/startRedis";
 import apiRouter from "./webservice/handler/api";
 import Auth from "./webService/middleware/auth";
-import Logger from './webservice/middleware/logger'
-import RedisDBMiddleWare from './webservice/middleware/redisDB'
+import Logger from "./webservice/middleware/logger";
+import LoggerCore from './service/logger'
+import RedisDBMiddleWare from "./webservice/middleware/redisDB";
 import { SESSION_CONFIG } from "./constants";
 
 class RegisterCenter {
@@ -20,6 +23,8 @@ class RegisterCenter {
    * Init status
    */
   initConst() {
+    this.webServer = null;
+    this.socketService = null
     this.webService = null;
     this.webServiceRouter = null;
     this.config = null;
@@ -48,10 +53,10 @@ class RegisterCenter {
     this.webService.keys = ["WDNMD"];
 
     /** MiddleWare */
-    this.webService.use(BodyParser())
+    this.webService.use(BodyParser());
     this.webService.use(Session(SESSION_CONFIG, this.webService));
-    this.webService.use(Logger())
-    this.webService.use(RedisDBMiddleWare(this.db))
+    this.webService.use(Logger());
+    this.webService.use(RedisDBMiddleWare(this.db));
     this.webService.use(Auth());
 
     this.webServiceRouter.use(
@@ -66,16 +71,28 @@ class RegisterCenter {
     this.webService.use(ctx => {
       ctx.body = "Hello Koa";
     });
+  }
 
-    this.webService.listen(8080);
+  /**
+   * load Web Server
+   * HTTP Server && Socket Server
+   */
+  loadWebServer() {
+    this.webServer = http.createServer(this.webService.callback())
+    this.socketService = socketio(this.webServer)
+    this.webServer.listen(Number(this.config.port),()=>{
+      LoggerCore.info(`Server Start`)
+      LoggerCore.info(`listening ${this.config.port}`)
+    })
   }
 
   async start() {
     await this.initConst();
     await this.loadRegisterCenterConfig();
-    await this.startRedisService()
+    await this.startRedisService();
     console.log("Config:", this.config);
     await this.loadWebService();
+    await this.loadWebServer();
   }
 }
 

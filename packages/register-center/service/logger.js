@@ -7,12 +7,12 @@ const getTime = () => {
 
 export default {
   info: info => {
-    console.log(`${getTime()} [info]: ${chalk.green(info)}`);
+    console.log(chalk.green(`${getTime()} [info]: ${String(info)}`));
   },
   error: info => {
-    console.log(`${getTime()} [info]: ${chalk.red(info)}`);
+    console.log(chalk.red(`${getTime()} [info]: ${String(info)}`));
   },
   warn: info => {
-    console.log(`${getTime()} [info]: ${chalk.yellow(info)}`);
+    console.log(chalk.yellow(`${getTime()} [info]: ${String(info)}`));
   }
 };
