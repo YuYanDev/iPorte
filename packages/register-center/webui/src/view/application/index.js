@@ -324,7 +324,7 @@ class Application extends React.Component {
    */
   async fetchApplicationList() {
     let applicationList = await getApplicationList();
-    this.setState({ applicationList });
+    this.setState({ applicationList: applicationList.data.applications });
   }
 
   componentDidMount() {

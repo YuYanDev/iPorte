@@ -35,6 +35,7 @@ api.get("/application/list", async ctx => {
 api.post("/application/add", async ctx => {
   const reqObj = ctx.request.body;
   if (!reqObj.name || !reqObj.domain) {
+    ctx.status = 400
     ctx.body = {
       code: 400,
       success: false,
@@ -48,6 +49,7 @@ api.post("/application/add", async ctx => {
       let newData = _.cloneDeep(data);
       // Check Domain Duplicates
       if (checkDomainDuplicates(data.applications, reqObj.domain)) {
+        ctx.status = 400
         ctx.body = {
           code: 400,
           success: false,
@@ -76,6 +78,7 @@ api.post("/application/add", async ctx => {
         message: "add success"
       };
     } else {
+      ctx.status = 500
       ctx.body = {
         code: 500,
         success: false,
@@ -83,6 +86,7 @@ api.post("/application/add", async ctx => {
       };
     }
   } catch (E) {
+    ctx.status = 500
     ctx.body = {
       code: 500,
       success: false,
@@ -94,6 +98,7 @@ api.post("/application/add", async ctx => {
 api.post("/application/edit", async ctx => {
   const reqObj = ctx.request.body;
   if (!reqObj.id) {
+    ctx.status = 400
     ctx.body = {
       code: 400,
       success: false,
@@ -115,6 +120,7 @@ api.post("/application/edit", async ctx => {
         message: "edit success"
       };
     } else {
+      ctx.status = 500
       ctx.body = {
         code: 500,
         success: false,
@@ -122,6 +128,7 @@ api.post("/application/edit", async ctx => {
       };
     }
   } catch (E) {
+    ctx.status = 500
     ctx.body = {
       code: 500,
       success: false,
@@ -133,6 +140,7 @@ api.post("/application/edit", async ctx => {
 api.post("/application/changestatus", async ctx => {
   const reqObj = ctx.request.body;
   if (!reqObj.id || !(reqObj.status === 1 || reqObj.status === 0)) {
+    ctx.status = 400
     ctx.body = {
       code: 400,
       success: false,
@@ -158,6 +166,7 @@ api.post("/application/changestatus", async ctx => {
         message: "changestatus success"
       };
     } else {
+      ctx.status = 500
       ctx.body = {
         code: 500,
         success: false,
@@ -165,6 +174,7 @@ api.post("/application/changestatus", async ctx => {
       };
     }
   } catch (E) {
+    ctx.status = 500
     ctx.body = {
       code: 500,
       success: false,
@@ -176,6 +186,7 @@ api.post("/application/changestatus", async ctx => {
 api.post("/application/delete", async ctx => {
   const reqObj = ctx.request.body;
   if (!reqObj.id) {
+    ctx.status = 400
     ctx.body = {
       code: 400,
       success: false,
@@ -198,6 +209,7 @@ api.post("/application/delete", async ctx => {
         message: "delete success"
       };
     } else {
+      ctx.status = 500
       ctx.body = {
         code: 500,
         success: false,
@@ -205,6 +217,7 @@ api.post("/application/delete", async ctx => {
       };
     }
   } catch (E) {
+    ctx.status = 500
     ctx.body = {
       code: 500,
       success: false,
