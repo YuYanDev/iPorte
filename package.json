@@ -5,8 +5,10 @@
   "main": "main.js",
   "scripts": {
     "rc": "node build/register-center/index.js",
+    "dev:doc": "cd docs/source && gitbook serve --port 2333",
     "dev:rc": "nodemon scripts/dev-register-center.js",
     "dev:rcui": "cd packages/register-center-webui && node scripts/start.js ",
+    "build:doc": "gitbook build docs/source docs/docs",
     "build:rc": "babel packages/register-center -d build/register-center --copy-files",
     "build:rcui": "cd packages/register-center-webui && node scripts/build.js "
   },
