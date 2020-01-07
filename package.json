@@ -6,9 +6,9 @@
   "scripts": {
     "rc": "node build/register-center/index.js",
     "dev:rc": "nodemon scripts/dev-register-center.js",
-    "dev:rcui": "cd packages/register-center/webui && node scripts/start.js ",
-    "build:rc": "babel packages/register-center -d build/register-center --ignore './packages/register-center/webui' --copy-files",
-    "build:rcui": "cd packages/register-center/webui && node scripts/build.js "
+    "dev:rcui": "cd packages/register-center-webui && node scripts/start.js ",
+    "build:rc": "babel packages/register-center -d build/register-center --copy-files",
+    "build:rcui": "cd packages/register-center-webui && node scripts/build.js "
   },
   "repository": {
     "type": "git",
