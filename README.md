@@ -10,7 +10,7 @@
 
 # Docs
 
-see -> [iPorte Docs](https://yuyandev.github.io)
+see -> [iPorte Docs](https://yuyandev.github.io/iPorte/docs)
 
 # Copyright
 
