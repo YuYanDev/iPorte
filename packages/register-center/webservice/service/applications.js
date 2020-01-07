@@ -1,4 +1,4 @@
-import _ from "loadsh";
+import _ from "lodash";
 
 export const checkDomainDuplicates = (domainList = [], domain = "") => {
   let res = domainList.find(x => x.domain === domain);
