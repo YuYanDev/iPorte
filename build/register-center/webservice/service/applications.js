@@ -1,33 +1,30 @@
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.deleteApplicationById = exports.changeApplicationStatusById = exports.changeApplicationInfoById = exports.checkDomainDuplicates = undefined;
+exports.deleteApplicationById = exports.changeApplicationStatusById = exports.changeApplicationInfoById = exports.checkDomainDuplicates = void 0;
 
-var _loadsh = require("loadsh");
+var _lodash = _interopRequireDefault(require("lodash"));
 
-var _loadsh2 = _interopRequireDefault(_loadsh);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var checkDomainDuplicates = exports.checkDomainDuplicates = function checkDomainDuplicates() {
+var checkDomainDuplicates = function checkDomainDuplicates() {
   var domainList = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
   var domain = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
-
-  var res = domainList.find(function (x) {
-    return x.domain === domain;
-  });
+  var res = domainList.find(x => x.domain === domain);
   return res === undefined ? false : true;
 };
 
-var changeApplicationInfoById = exports.changeApplicationInfoById = function changeApplicationInfoById() {
+exports.checkDomainDuplicates = checkDomainDuplicates;
+
+var changeApplicationInfoById = function changeApplicationInfoById() {
   var originalData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var changeData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-  return originalData.applications.map(function (e) {
+  return originalData.applications.map(e => {
     if (e.id === changeData.id) {
-      var newE = _loadsh2.default.cloneDeep(e);
+      var newE = _lodash.default.cloneDeep(e);
+
       newE.name = changeData.name ? changeData.name : e.name;
       newE.domain = changeData.domain && !checkDomainDuplicates(originalData.applications, changeData.domain) ? changeData.domain : e.domain;
       return newE;
@@ -37,14 +34,16 @@ var changeApplicationInfoById = exports.changeApplicationInfoById = function cha
   });
 };
 
-var changeApplicationStatusById = exports.changeApplicationStatusById = function changeApplicationStatusById() {
+exports.changeApplicationInfoById = changeApplicationInfoById;
+
+var changeApplicationStatusById = function changeApplicationStatusById() {
   var originalData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   var status = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-  return originalData.applications.map(function (e) {
+  return originalData.applications.map(e => {
     if (e.id === id) {
-      var newE = _loadsh2.default.cloneDeep(e);
+      var newE = _lodash.default.cloneDeep(e);
+
       newE.status = status;
       return newE;
     } else {
@@ -53,12 +52,16 @@ var changeApplicationStatusById = exports.changeApplicationStatusById = function
   });
 };
 
-var deleteApplicationById = exports.deleteApplicationById = function deleteApplicationById(data, id) {
+exports.changeApplicationStatusById = changeApplicationStatusById;
+
+var deleteApplicationById = (data, id) => {
   var afterApplication = [];
-  data.applications.forEach(function (e) {
+  data.applications.forEach(e => {
     if (e.id === id) {} else {
       afterApplication.push(e);
     }
   });
   return afterApplication;
 };
+
+exports.deleteApplicationById = deleteApplicationById;

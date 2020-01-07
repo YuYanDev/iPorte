@@ -1,55 +1,39 @@
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = void 0;
 
-var _regenerator = require("babel-runtime/regenerator");
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var _regenerator2 = _interopRequireDefault(_regenerator);
+var _logger = _interopRequireDefault(require("../../service/logger"));
 
-var _asyncToGenerator2 = require("babel-runtime/helpers/asyncToGenerator");
+var Logger = () => {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref = (0, _asyncToGenerator2.default)(function* (ctx, next) {
+        ctx.Logger = _logger.default;
+        yield next();
 
-var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
-var _logger = require("../../service/logger");
-
-var _logger2 = _interopRequireDefault(_logger);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Logger = function Logger() {
-  return function () {
-    var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(ctx, next) {
-      return _regenerator2.default.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              ctx.Logger = _logger2.default;
-              _context.next = 3;
-              return next();
-
-            case 3:
-              if (ctx.status === 500) {
-                ctx.Logger.error(ctx.status + " " + ctx.request.method + " " + ctx.request.url);
-              } else if (ctx.status === 200 || ctx.status === 302) {
-                ctx.Logger.info(ctx.status + " " + ctx.request.method + " " + ctx.request.url);
-              } else {
-                ctx.Logger.warn(ctx.status + " " + ctx.request.method + " " + ctx.request.url);
-              }
-
-            case 4:
-            case "end":
-              return _context.stop();
-          }
+        if (ctx.status === 500) {
+          ctx.Logger.error("".concat(ctx.status, " ").concat(ctx.request.method, " ").concat(ctx.request.url));
+        } else if (ctx.status === 200 || ctx.status === 302) {
+          ctx.Logger.info("".concat(ctx.status, " ").concat(ctx.request.method, " ").concat(ctx.request.url));
+        } else {
+          ctx.Logger.warn("".concat(ctx.status, " ").concat(ctx.request.method, " ").concat(ctx.request.url));
         }
-      }, _callee, undefined);
-    }));
+      });
 
-    return function (_x, _x2) {
-      return _ref.apply(this, arguments);
-    };
-  }();
+      return function (_x, _x2) {
+        return _ref.apply(this, arguments);
+      };
+    }()
+  );
 };
 
-exports.default = Logger;
+var _default = Logger;
+exports.default = _default;

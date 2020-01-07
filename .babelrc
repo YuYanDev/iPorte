@@ -1,5 +1,15 @@
 {
-  "presets": ["stage-0","es2015"],
+  // "presets": ["stage-0","es2015"],
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "esmodules": true
+        }
+      }
+    ]
+  ],
   "ignore":["./packages/register-center/webservice/view"],
-  "plugins": ["transform-runtime"]
+  "plugins": ["@babel/plugin-transform-runtime"]
 }
