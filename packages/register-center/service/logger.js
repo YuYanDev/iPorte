@@ -9,6 +9,9 @@ export default {
   info: info => {
     console.log(chalk.green(`${getTime()} [info]: ${String(info)}`));
   },
+  majorinfo: info => {
+    console.log(chalk.cyan(`${getTime()} [info]: ${String(info)}`));
+  },
   error: info => {
     console.log(chalk.red(`${getTime()} [error]: ${String(info)}`));
   },

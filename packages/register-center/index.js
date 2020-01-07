@@ -47,12 +47,14 @@ class RegisterCenter {
    * Read Register Center config from toml file
    */
   async loadRegisterCenterConfig() {
+    LoggerCore.majorinfo(`Reading constants from a config file`);
     this.config = await loadConfigObjFromToml(
       path.join(__dirname, "config.toml")
     );
   }
 
   startRedisService() {
+    LoggerCore.majorinfo(`Starting Redis Service`);
     this.db = startRedis(this.config.redis);
   }
 
@@ -60,6 +62,7 @@ class RegisterCenter {
    * load Web Service (Koa Server)
    */
   loadWebService() {
+    LoggerCore.majorinfo(`Starting Web Service`);
     this.webService = new Koa();
     this.webServiceRouter = new Router();
     this.webService.keys = ["WDNMD"];
@@ -96,10 +99,10 @@ class RegisterCenter {
    */
   loadWebServer() {
     this.webServer = http.createServer(this.webService.callback());
+    LoggerCore.majorinfo(`Starting Socket Service`);
     this.socketService = socketio(this.webServer);
     this.webServer.listen(Number(this.config.port), () => {
-      LoggerCore.info(`RegisterCenter Server Start`);
-      LoggerCore.info(`listening ${this.config.port}`);
+      LoggerCore.majorinfo(`RegisterCenter Server has been started. listening port ${this.config.port}`);
     });
   }
 
