@@ -19,7 +19,7 @@ var startRedis = function startRedis() {
 
   var client = _redis.default.createClient(config.port, config.address);
 
-  client.on("error", err => {
+  client.on("error", function (err) {
     _logger.default.error(err);
   });
   return client;

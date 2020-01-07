@@ -16,7 +16,7 @@ var _githubOauth = _interopRequireDefault(require("../plugin/github-oauth2"));
 //     await next();
 //   };
 // };
-var Auth = () => {
+var Auth = function Auth() {
   return (
     /*#__PURE__*/
     function () {

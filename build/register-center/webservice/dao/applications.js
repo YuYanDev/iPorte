@@ -5,9 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.setApplicationsList = exports.getApplicationsList = void 0;
 
-var getApplicationsList = ctx => {
-  return new Promise((resovle, reject) => {
-    ctx.DB.get("IPorte_Applications", (err, data) => {
+var getApplicationsList = function getApplicationsList(ctx) {
+  return new Promise(function (resovle, reject) {
+    ctx.DB.get("IPorte_Applications", function (err, data) {
       if (err) {
         reject(ctx.Logger.error(String(err)));
       }
@@ -19,8 +19,8 @@ var getApplicationsList = ctx => {
 
 exports.getApplicationsList = getApplicationsList;
 
-var setApplicationsList = (ctx, data) => {
-  return new Promise((resovle, reject) => {
+var setApplicationsList = function setApplicationsList(ctx, data) {
+  return new Promise(function (resovle, reject) {
     resovle(ctx.DB.set("IPorte_Applications", JSON.stringify(data)));
   });
 };

@@ -9,7 +9,7 @@ exports.default = void 0;
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var redisDB = db => {
+var redisDB = function redisDB(db) {
   return (
     /*#__PURE__*/
     function () {

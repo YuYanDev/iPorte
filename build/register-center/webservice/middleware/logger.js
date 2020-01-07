@@ -11,7 +11,7 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 
 var _logger = _interopRequireDefault(require("../../service/logger"));
 
-var Logger = () => {
+var Logger = function Logger() {
   return (
     /*#__PURE__*/
     function () {

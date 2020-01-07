@@ -1,14 +1,19 @@
 import fs from "fs";
-import concat from "concat-stream";
 import toml from "toml";
+import { defaultConfig } from '../constants/index' 
+import Logger from './logger'
 
 const loadConfigObjFromToml = filePath => {
   return new Promise(resolve => {
-    fs.createReadStream(filePath, "utf8").pipe(
-      concat(data => {
-        resolve(toml.parse(data));
-      })
-    );
+    fs.readFile(filePath, function(err, data) {
+      if (err) {
+        Logger.error(err);
+        Logger.warn("can't load config file. load default config");
+        resolve(defaultConfig);
+        return;
+      }
+      resolve(toml.parse(data.toString()));
+    });
   });
 };
 

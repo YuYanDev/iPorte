@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.SESSION_CONFIG = void 0;
+exports.defaultConfig = exports.SESSION_CONFIG = void 0;
 var SESSION_CONFIG = {
   key: "IPorte:SESSION",
   //cookie key (default is koa:sess)
@@ -21,3 +21,15 @@ var SESSION_CONFIG = {
 
 };
 exports.SESSION_CONFIG = SESSION_CONFIG;
+var defaultConfig = {
+  info: 'default',
+  port: 8080,
+  trusttoken: {
+    broadcast: "A31D78B11109A"
+  },
+  redis: {
+    address: "localhost",
+    port: 6379
+  }
+};
+exports.defaultConfig = defaultConfig;

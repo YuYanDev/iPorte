@@ -7,3 +7,10 @@ export const SESSION_CONFIG = {
   rolling: false, //在每次请求时强行设置cookie，这将重置cookie过期时间（默认：false）
   renew: false //(boolean) renew session when session is nearly expired,
 };
+
+export const defaultConfig = {
+  info: 'default',
+  port: 8080,
+  trusttoken: { broadcast: "A31D78B11109A" },
+  redis: { address: "localhost", port: 6379 }
+};

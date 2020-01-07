@@ -10,6 +10,11 @@
       }
     ]
   ],
-  "ignore":["./packages/register-center/webservice/view"],
-  "plugins": ["@babel/plugin-transform-runtime"]
+  "ignore": ["./packages/register-center/webservice/view"],
+  "plugins": [
+    "@babel/plugin-transform-runtime",
+    "@babel/plugin-transform-arrow-functions",
+    "@babel/plugin-transform-block-scoping",
+    "@babel/plugin-transform-classes"
+  ]
 }

@@ -26,7 +26,7 @@ import { SESSION_CONFIG } from "./constants";
 class RegisterCenter {
   constructor() {
     console.log(
-      "------------------------------ Start RegisterCenter ------------------------------"
+      "\n------------------------------ Start RegisterCenter ------------------------------\n"
     );
     this.start();
   }
@@ -50,7 +50,6 @@ class RegisterCenter {
     this.config = await loadConfigObjFromToml(
       path.join(__dirname, "config.toml")
     );
-    console.log("Config:", this.config);
   }
 
   startRedisService() {
@@ -99,7 +98,7 @@ class RegisterCenter {
     this.webServer = http.createServer(this.webService.callback());
     this.socketService = socketio(this.webServer);
     this.webServer.listen(Number(this.config.port), () => {
-      LoggerCore.info(`Server Start`);
+      LoggerCore.info(`RegisterCenter Server Start`);
       LoggerCore.info(`listening ${this.config.port}`);
     });
   }

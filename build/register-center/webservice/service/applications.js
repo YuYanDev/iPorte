@@ -12,7 +12,9 @@ var _lodash = _interopRequireDefault(require("lodash"));
 var checkDomainDuplicates = function checkDomainDuplicates() {
   var domainList = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
   var domain = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
-  var res = domainList.find(x => x.domain === domain);
+  var res = domainList.find(function (x) {
+    return x.domain === domain;
+  });
   return res === undefined ? false : true;
 };
 
@@ -21,7 +23,7 @@ exports.checkDomainDuplicates = checkDomainDuplicates;
 var changeApplicationInfoById = function changeApplicationInfoById() {
   var originalData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var changeData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  return originalData.applications.map(e => {
+  return originalData.applications.map(function (e) {
     if (e.id === changeData.id) {
       var newE = _lodash.default.cloneDeep(e);
 
@@ -40,7 +42,7 @@ var changeApplicationStatusById = function changeApplicationStatusById() {
   var originalData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   var status = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-  return originalData.applications.map(e => {
+  return originalData.applications.map(function (e) {
     if (e.id === id) {
       var newE = _lodash.default.cloneDeep(e);
 
@@ -54,9 +56,9 @@ var changeApplicationStatusById = function changeApplicationStatusById() {
 
 exports.changeApplicationStatusById = changeApplicationStatusById;
 
-var deleteApplicationById = (data, id) => {
+var deleteApplicationById = function deleteApplicationById(data, id) {
   var afterApplication = [];
-  data.applications.forEach(e => {
+  data.applications.forEach(function (e) {
     if (e.id === id) {} else {
       afterApplication.push(e);
     }

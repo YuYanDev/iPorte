@@ -4,6 +4,10 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
 var _path = _interopRequireDefault(require("path"));
 
 var _http = _interopRequireDefault(require("http"));
@@ -47,9 +51,12 @@ var _constants = require("./constants");
 // koa handler
 // koa middleware
 // constants
-class RegisterCenter {
-  constructor() {
-    console.log("------------------------------ Start RegisterCenter ------------------------------");
+var RegisterCenter =
+/*#__PURE__*/
+function () {
+  function RegisterCenter() {
+    (0, _classCallCheck2.default)(this, RegisterCenter);
+    console.log("\n------------------------------ Start RegisterCenter ------------------------------\n");
     this.start();
   }
   /**
@@ -57,83 +64,100 @@ class RegisterCenter {
    */
 
 
-  initConst() {
-    this.webServer = null;
-    this.socketService = null;
-    this.webService = null;
-    this.webServiceRouter = null;
-    this.config = null;
-    this.db = null;
-  }
-  /**
-   * Read Register Center config from toml file
-   */
+  (0, _createClass2.default)(RegisterCenter, [{
+    key: "initConst",
+    value: function initConst() {
+      this.webServer = null;
+      this.socketService = null;
+      this.webService = null;
+      this.webServiceRouter = null;
+      this.config = null;
+      this.db = null;
+    }
+    /**
+     * Read Register Center config from toml file
+     */
 
+  }, {
+    key: "loadRegisterCenterConfig",
+    value: function () {
+      var _loadRegisterCenterConfig = (0, _asyncToGenerator2.default)(function* () {
+        this.config = yield (0, _readToml.default)(_path.default.join(__dirname, "config.toml"));
+      });
 
-  loadRegisterCenterConfig() {
-    var _this = this;
+      function loadRegisterCenterConfig() {
+        return _loadRegisterCenterConfig.apply(this, arguments);
+      }
 
-    return (0, _asyncToGenerator2.default)(function* () {
-      _this.config = yield (0, _readToml.default)(_path.default.join(__dirname, "config.toml"));
-      console.log("Config:", _this.config);
-    })();
-  }
+      return loadRegisterCenterConfig;
+    }()
+  }, {
+    key: "startRedisService",
+    value: function startRedisService() {
+      this.db = (0, _startRedis.default)(this.config.redis);
+    }
+    /**
+     * load Web Service (Koa Server)
+     */
 
-  startRedisService() {
-    this.db = (0, _startRedis.default)(this.config.redis);
-  }
-  /**
-   * load Web Service (Koa Server)
-   */
+  }, {
+    key: "loadWebService",
+    value: function loadWebService() {
+      this.webService = new _koa.default();
+      this.webServiceRouter = new _koaRouter.default();
+      this.webService.keys = ["WDNMD"];
+      /** MiddleWare */
 
+      this.webService.use((0, _koaBodyparser.default)());
+      this.webService.use((0, _koaSession.default)(_constants.SESSION_CONFIG, this.webService));
+      this.webService.use((0, _logger2.default)());
+      this.webService.use((0, _redisDB.default)(this.db));
+      this.webService.use((0, _koaViews.default)(_path.default.join(__dirname, './webservice/view'))); // this.webService.use(Auth());
 
-  loadWebService() {
-    this.webService = new _koa.default();
-    this.webServiceRouter = new _koaRouter.default();
-    this.webService.keys = ["WDNMD"];
-    /** MiddleWare */
+      this.webService.use((0, _koaMount.default)('/static', (0, _koaStatic.default)(_path.default.join(__dirname, './webservice/view/static/'))));
+      /** Handler | Router */
 
-    this.webService.use((0, _koaBodyparser.default)());
-    this.webService.use((0, _koaSession.default)(_constants.SESSION_CONFIG, this.webService));
-    this.webService.use((0, _logger2.default)());
-    this.webService.use((0, _redisDB.default)(this.db));
-    this.webService.use((0, _koaViews.default)(_path.default.join(__dirname, './webservice/view'))); // this.webService.use(Auth());
+      this.webServiceRouter.use("/api", _api.default.routes(), _api.default.allowedMethods());
+      this.webServiceRouter.use("/", _index.default.routes(), _index.default.allowedMethods());
+      this.webService.use(this.webServiceRouter.routes()).use(this.webServiceRouter.allowedMethods());
+    }
+    /**
+     * load Web Server
+     * HTTP Server && Socket Server
+     */
 
-    this.webService.use((0, _koaMount.default)('/static', (0, _koaStatic.default)(_path.default.join(__dirname, './webservice/view/static/'))));
-    /** Handler | Router */
+  }, {
+    key: "loadWebServer",
+    value: function loadWebServer() {
+      var _this = this;
 
-    this.webServiceRouter.use("/api", _api.default.routes(), _api.default.allowedMethods());
-    this.webServiceRouter.use("/", _index.default.routes(), _index.default.allowedMethods());
-    this.webService.use(this.webServiceRouter.routes()).use(this.webServiceRouter.allowedMethods());
-  }
-  /**
-   * load Web Server
-   * HTTP Server && Socket Server
-   */
+      this.webServer = _http.default.createServer(this.webService.callback());
+      this.socketService = (0, _socket.default)(this.webServer);
+      this.webServer.listen(Number(this.config.port), function () {
+        _logger.default.info("RegisterCenter Server Start");
 
+        _logger.default.info("listening ".concat(_this.config.port));
+      });
+    }
+  }, {
+    key: "start",
+    value: function () {
+      var _start = (0, _asyncToGenerator2.default)(function* () {
+        yield this.initConst();
+        yield this.loadRegisterCenterConfig();
+        yield this.startRedisService();
+        yield this.loadWebService();
+        yield this.loadWebServer();
+      });
 
-  loadWebServer() {
-    this.webServer = _http.default.createServer(this.webService.callback());
-    this.socketService = (0, _socket.default)(this.webServer);
-    this.webServer.listen(Number(this.config.port), () => {
-      _logger.default.info("Server Start");
+      function start() {
+        return _start.apply(this, arguments);
+      }
 
-      _logger.default.info("listening ".concat(this.config.port));
-    });
-  }
-
-  start() {
-    var _this2 = this;
-
-    return (0, _asyncToGenerator2.default)(function* () {
-      yield _this2.initConst();
-      yield _this2.loadRegisterCenterConfig();
-      yield _this2.startRedisService();
-      yield _this2.loadWebService();
-      yield _this2.loadWebServer();
-    })();
-  }
-
-}
+      return start;
+    }()
+  }]);
+  return RegisterCenter;
+}();
 
 new RegisterCenter();
