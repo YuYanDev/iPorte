@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import Router from "koa-router";
 import Json from "koa-json";
 import { getApplicationsList, setApplicationsList } from "../dao/applications";

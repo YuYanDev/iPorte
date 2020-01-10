@@ -23,7 +23,7 @@ var Auth = function Auth() {
       var _ref = (0, _asyncToGenerator2.default)(function* (ctx, next) {
         if (ctx.session && ctx.session.id) {
           yield next();
-        } else if (ctx.request.url === "/" || ctx.request.url === "/favicon.ico") {
+        } else if (ctx.request.url === "/" || ctx.request.url === "/favicon.ico" || ctx.request.url.indexOf("/static") !== -1) {
           yield next();
         } else if (ctx.request.url.indexOf("/auth") !== -1) {
           yield (0, _githubOauth.default)(ctx);

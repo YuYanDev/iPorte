@@ -19,6 +19,9 @@ var _default = {
   info: function info(_info) {
     console.log(_chalk.default.green("".concat(getTime(), " [info]: ").concat(String(_info))));
   },
+  majorinfo: function majorinfo(info) {
+    console.log(_chalk.default.cyan("".concat(getTime(), " [info]: ").concat(String(info))));
+  },
   error: function error(info) {
     console.log(_chalk.default.red("".concat(getTime(), " [error]: ").concat(String(info))));
   },

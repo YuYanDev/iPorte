@@ -9,8 +9,6 @@ exports.default = void 0;
 
 var _fs = _interopRequireDefault(require("fs"));
 
-var _concatStream = _interopRequireDefault(require("concat-stream"));
-
 var _toml = _interopRequireDefault(require("toml"));
 
 var _index = require("../constants/index");

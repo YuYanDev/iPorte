@@ -9,7 +9,7 @@ const Auth = () => {
   return async (ctx, next) => {
     if (ctx.session && ctx.session.id) {
       await next();
-    } else if (ctx.request.url === "/" || ctx.request.url === "/favicon.ico") {
+    } else if (ctx.request.url === "/" || ctx.request.url === "/favicon.ico" || ctx.request.url.indexOf("/static")!==-1) {
       await next();
     } else if (ctx.request.url.indexOf("/auth") !== -1) {
       await githubOAuth2(ctx);

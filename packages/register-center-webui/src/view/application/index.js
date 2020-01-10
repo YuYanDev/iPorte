@@ -1,12 +1,16 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Table, Button, Badge, Modal } from "antd";
-import { getApplicationList } from "../../api/application";
+import { Table, Button, Badge, message, Modal } from "antd";
+import { getApplicationList, deleteApplicationById } from "../../api/application";
 
 class Application extends React.Component {
-  statusHashMap = {
-    Stop: "error",
-    Running: "success"
+  statusBadgeHashMap = {
+    0: "error",
+    1: "success"
+  };
+  statusTextHashMap = {
+    0: "Stoped",
+    1: "Running"
   };
 
   getDomainListColumns() {
@@ -42,8 +46,8 @@ class Application extends React.Component {
         width: 150,
         render: (text, record) => (
           <span>
-            <Badge status={this.statusHashMap[text]} />
-            {text}
+            <Badge status={this.statusBadgeHashMap[text]} />
+            {this.statusTextHashMap[text]}
           </span>
         )
       },
@@ -133,8 +137,8 @@ class Application extends React.Component {
         width: 150,
         render: (text, record) => (
           <span>
-            <Badge status={this.statusHashMap[text]} />
-            {text}
+            <Badge status={this.statusBadgeHashMap[text]} />
+            {this.statusTextHashMap[text]}
           </span>
         )
       },
@@ -307,6 +311,18 @@ class Application extends React.Component {
   };
 
   handleDropModalOk = () => {
+    if(this.state.dropModalType === "domain"){
+      deleteApplicationById({id:this.state.dropModalTypeId}).then(()=>{
+        message.success(this.props.lang["application.common.drop_domain_success"])
+      }).catch(()=>{
+        message.error(this.props.lang["application.common.drop_domain_unsuccess"])
+      })
+    }
+    if(this.state.dropModalType === "rule"){
+      console.log('rul',this.state.dropModalTypeId)
+      message.success(this.props.lang["application.common.drop_rule_success"])
+    }
+    // deleteApplicationById
     this.handleDropModalCancel();
   };
 

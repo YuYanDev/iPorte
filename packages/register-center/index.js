@@ -73,7 +73,7 @@ class RegisterCenter {
     this.webService.use(Logger());
     this.webService.use(RedisDBMiddleWare(this.db));
     this.webService.use(Views(path.join(__dirname, './webservice/view')))
-    // this.webService.use(Auth());
+    this.webService.use(Auth());
     this.webService.use(Mount('/static',Static(path.join(__dirname, './webservice/view/static/'))))
     
     /** Handler | Router */

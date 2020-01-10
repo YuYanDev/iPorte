@@ -31,6 +31,10 @@ const zh_CN = {
   "application.common.stop_rule": "确定停用此转发规则吗？",
   "application.common.drop_domain": "确定删除此域名吗？",
   "application.common.drop_rule": "确定删除此转发规则吗？",
+  "application.common.drop_domain_success":"删除域名成功",
+  "application.common.drop_domain_unsuccess":"删除域名失败",
+  "application.common.drop_rule_success":"删除规则成功",
+  "application.common.drop_rule_unsuccess":"删除规则失败"
 };
 
 const en_US = {
@@ -66,6 +70,10 @@ const en_US = {
   "application.common.stop_rule": "Are you sure stop this rule?",
   "application.common.drop_domain": "Are you sure delete this domain?",
   "application.common.drop_rule": "Are you sure delete this rule?",
+  "application.common.drop_domain_success":"deleted domain successfully.",
+  "application.common.drop_domain_unsuccess":"deleted domain failed.",
+  "application.common.drop_rule_success":"deleted rule successfully.",
+  "application.common.drop_rule_unsuccess":"deleted rule failed."
 };
 
 export default {

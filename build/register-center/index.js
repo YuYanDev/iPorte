@@ -82,6 +82,8 @@ function () {
     key: "loadRegisterCenterConfig",
     value: function () {
       var _loadRegisterCenterConfig = (0, _asyncToGenerator2.default)(function* () {
+        _logger.default.majorinfo("Reading constants from a config file");
+
         this.config = yield (0, _readToml.default)(_path.default.join(__dirname, "config.toml"));
       });
 
@@ -94,6 +96,8 @@ function () {
   }, {
     key: "startRedisService",
     value: function startRedisService() {
+      _logger.default.majorinfo("Starting Redis Service");
+
       this.db = (0, _startRedis.default)(this.config.redis);
     }
     /**
@@ -103,6 +107,8 @@ function () {
   }, {
     key: "loadWebService",
     value: function loadWebService() {
+      _logger.default.majorinfo("Starting Web Service");
+
       this.webService = new _koa.default();
       this.webServiceRouter = new _koaRouter.default();
       this.webService.keys = ["WDNMD"];
@@ -112,8 +118,8 @@ function () {
       this.webService.use((0, _koaSession.default)(_constants.SESSION_CONFIG, this.webService));
       this.webService.use((0, _logger2.default)());
       this.webService.use((0, _redisDB.default)(this.db));
-      this.webService.use((0, _koaViews.default)(_path.default.join(__dirname, './webservice/view'))); // this.webService.use(Auth());
-
+      this.webService.use((0, _koaViews.default)(_path.default.join(__dirname, './webservice/view')));
+      this.webService.use((0, _auth.default)());
       this.webService.use((0, _koaMount.default)('/static', (0, _koaStatic.default)(_path.default.join(__dirname, './webservice/view/static/'))));
       /** Handler | Router */
 
@@ -132,11 +138,12 @@ function () {
       var _this = this;
 
       this.webServer = _http.default.createServer(this.webService.callback());
+
+      _logger.default.majorinfo("Starting Socket Service");
+
       this.socketService = (0, _socket.default)(this.webServer);
       this.webServer.listen(Number(this.config.port), function () {
-        _logger.default.info("RegisterCenter Server Start");
-
-        _logger.default.info("listening ".concat(_this.config.port));
+        _logger.default.majorinfo("RegisterCenter Server has been started. listening port ".concat(_this.config.port));
       });
     }
   }, {
