@@ -1,3 +1,11 @@
+/**
+ * findRuleTargetByUrl
+ * 
+ * Find the best matching rules through routing and routing tables
+ * 
+ * @param {Array} ruleList 
+ * @param {String} url 
+ */
 export const findRuleTargetByUrl = (ruleList, url) => {
   let missQueryUrl = url.split("?")[0];
   let missLastSlashUrl =

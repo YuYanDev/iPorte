@@ -1,6 +1,10 @@
 import http from "http";
+import path from "path";
 import httpProxy from "http-proxy";
-import { findRuleTargetByUrl } from "./util";
+import io from "socket.io-client";
+import { findRuleTargetByUrl } from "./src/util";
+import Logger from "./src/logger";
+import loadConfigObjFromToml from "./src/readToml";
 
 class Gate {
   constructor() {
@@ -16,101 +20,64 @@ class Gate {
   initConst() {
     this.gateServer = null;
     this.proxyServer = null;
+    this.socketClient = null;
     this.routingTable = [];
+    this.config = null;
+  }
+
+  async loadGateConfig() {
+    Logger.majorinfo(`Reading constants from a config file`);
+    this.config = await loadConfigObjFromToml(
+      path.join(__dirname, "config.toml")
+    );
   }
 
   establishSocket() {
-    this.routingTable = [
-      {
-        id: 4,
-        name: "test2",
-        domain: "test2.lolita.im",
-        status: 1,
-        rule_incremental_statistics: 0,
-        rule_total: 0,
-        rule: []
-      },
-      {
-        id: 1,
-        name: "主站API入口",
-        domain: "api.lolita.im",
-        status: 1,
-        rule_incremental: 2,
-        rule_total: 2,
-        rule: [
-          {
-            id: 1,
-            name: "注册中心转发",
-            suffix: "/register-center",
-            status: 1,
-            rewrite: true,
-            rewrite_rule: "^",
-            type: "Reverse Proxy",
-            target: "https://register-center.k8s.alleysakura.com"
-          },
-          {
-            id: 2,
-            name: "运维监控",
-            suffix: "/bot",
-            status: 0,
-            rewrite: true,
-            rewrite_rule: "^",
-            type: "Reverse Proxy",
-            target: "https://bot.gate.alleysakura.com"
-          }
-        ]
-      },
-      {
-        id: 2,
-        name: "主站入口",
-        domain: "lolita.im",
-        status: 1,
-        rule_incremental: 4,
-        rule_total: 4,
-        rule: [
-          {
-            id: 1,
-            name: "应用反向代理",
-            suffix: "/",
-            status: 1,
-            rewrite: false,
-            rewrite_rule: "",
-            type: "Reverse Proxy",
-            target: "http://localhost:8080"
-          },
-          {
-            id: 2,
-            name: "应用反向代理123123",
-            suffix: "/test1",
-            status: 1,
-            rewrite: false,
-            rewrite_rule: "",
-            type: "Reverse Proxy",
-            target: "https://static2.alleysakura.com"
-          },
-          {
-            id: 3,
-            name: "应用反向代理asdad",
-            suffix: "/test1/testx",
-            status: 1,
-            rewrite: false,
-            rewrite_rule: "",
-            type: "Reverse Proxy",
-            target: "https://static3.alleysakura.com"
-          },
-          {
-            id: 4,
-            name: "应用反向代理qweqwe",
-            suffix: "/test2",
-            status: 1,
-            rewrite: false,
-            rewrite_rule: "",
-            type: "Reverse Proxy",
-            target: "https://static4.alleysakura.com"
-          }
-        ]
-      }
-    ];
+    this.socketClient = io(this.config.RegisterCenter, {
+      reconnection: true,
+      reconnectionDelayMax: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5
+    });
+
+    this.socketClient.on("connect", () => {
+      this.socketClient.emit("registered", {
+        id: this.config.NodeId,
+        trustToken: this.config.TrustToken
+      });
+      Logger.info("Establish a socket connection with the registry");
+    });
+
+    this.socketClient.on("disconnect", () => {
+      Logger.warn("Close connection");
+    });
+
+    this.socketClient.on("UpdateRoute", async message => {
+      console.log(message)
+    });
+
+    this.socketClient.on("rejection_token", async msg => {
+      Logger.warn("Wrong key, unable to establish connection");
+      this.socketClient.close()
+    });
+
+    this.socketClient.on("RouterConfig", async routerConfig => {
+      Logger.info("Receive the configuration sent from the registry");
+      console.log("routerTable", JSON.stringify(routerConfig.data));
+      this.routingTable = routerConfig.data;
+    });
+
+    this.socketClient.on("reconnecting", attemptNumber => {
+      Logger.warn(
+        `Unable to connect to the Registry Center, retrying, ${attemptNumber}th time`
+      );
+    });
+
+    this.socketClient.on("reconnect_failed", () => {
+      Logger.error("Retry reached maximum limit, reconnect failed");
+    });
+
+    this.routingTable = [];
   }
 
   createServer() {
@@ -119,7 +86,7 @@ class Gate {
       res.writeHead(500, {
         "Content-Type": "text/plain"
       });
-      console.log(err);
+      Logger.error(String(err));
       res.end(
         "Something went wrong. And we are reporting a custom error message."
       );
@@ -137,6 +104,9 @@ class Gate {
         res.writeHead(404, {
           "Content-Type": "text/plain"
         });
+        Logger.warn(
+          "Domain: " + host + " ,Path: " + url + " ,Info: Not Found!" + " ;"
+        );
         res.end("Not Found!");
       } else {
         const ruleRule = findRuleTargetByUrl(hostRule.rule, url);
@@ -144,26 +114,31 @@ class Gate {
           res.writeHead(404, {
             "Content-Type": "text/plain"
           });
+          Logger.warn(
+            "Domain: " + host + " ,Path: " + url + " ,Info: Not Found!" + " ;"
+          );
           res.end("Not Found!");
         } else {
-          console.log(
-            "host: ",
-            host,
-            " path: ",
-            url,
-            " target: ",
-            ruleRule.suffix,
-            " pass"
+          Logger.info(
+            "Domain: " +
+              host +
+              " ,Path: " +
+              url +
+              " ,MatchRule: " +
+              ruleRule.suffix +
+              " ,Target: " +
+              ruleRule.target +
+              " ;"
           );
           this.proxyServer.web(req, res, { target: ruleRule.target });
         }
       }
-
-      //   console.log(hostRule);
     });
-    this.gateServer.listen(80);
+    this.gateServer.listen(this.config.listen);
   }
   async start() {
+    await this.initConst();
+    await this.loadGateConfig();
     await this.establishSocket();
     await this.createServer();
   }

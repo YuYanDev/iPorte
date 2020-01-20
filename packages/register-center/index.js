@@ -6,16 +6,16 @@ import Koa from "koa";
 import BodyParser from "koa-bodyparser";
 import Router from "koa-router";
 import Session from "koa-session";
-import Views from "koa-views"
-import Static from "koa-static"
-import Mount from "koa-mount"
+import Views from "koa-views";
+import Static from "koa-static";
+import Mount from "koa-mount";
 // common service
 import loadConfigObjFromToml from "./service/readToml";
 import startRedis from "./service/startRedis";
 import LoggerCore from "./service/logger";
 // koa handler
 import apiRouter from "./webservice/handler/api";
-import indexRouter from "./webservice/handler/index"
+import indexRouter from "./webservice/handler/index";
 // koa middleware
 import Auth from "./webService/middleware/auth";
 import Logger from "./webservice/middleware/logger";
@@ -41,6 +41,7 @@ class RegisterCenter {
     this.webServiceRouter = null;
     this.config = null;
     this.db = null;
+    this.gateList = [];
   }
 
   /**
@@ -58,6 +59,10 @@ class RegisterCenter {
     this.db = startRedis(this.config.redis);
   }
 
+  broadcastRouterTable(){
+    this.socketService.emit('UpdateRoute',{ msg: "bord" });
+  }
+  
   /**
    * load Web Service (Koa Server)
    */
@@ -72,10 +77,15 @@ class RegisterCenter {
     this.webService.use(Session(SESSION_CONFIG, this.webService));
     this.webService.use(Logger());
     this.webService.use(RedisDBMiddleWare(this.db));
-    this.webService.use(Views(path.join(__dirname, './webservice/view')))
+    this.webService.use(Views(path.join(__dirname, "./webservice/view")));
     this.webService.use(Auth());
-    this.webService.use(Mount('/static',Static(path.join(__dirname, './webservice/view/static/'))))
-    
+    this.webService.use(
+      Mount(
+        "/static",
+        Static(path.join(__dirname, "./webservice/view/static/"))
+      )
+    );
+
     /** Handler | Router */
     this.webServiceRouter.use(
       "/api",
@@ -101,8 +111,48 @@ class RegisterCenter {
     this.webServer = http.createServer(this.webService.callback());
     LoggerCore.majorinfo(`Starting Socket Service`);
     this.socketService = socketio(this.webServer);
+    this.socketService.on("connect", client => {
+      client.on("message", async message => {
+        console.log(message);
+      });
+      
+      client.on("registered", async data => {
+        let nodeInfo = {
+          ...data,
+          clientId: client.id
+        };
+        if (data && data.trustToken !== this.config.TrustToken) {
+          LoggerCore.warn(
+            "Handshake failed, keys do not match: " + JSON.stringify(nodeInfo)
+          );
+          client.emit("rejection_token");
+        } else {
+          LoggerCore.majorinfo(
+            "Received registration request from Gate Node: " +
+              JSON.stringify(nodeInfo)
+          );
+          this.db.get("IPorte_Applications", (err, data) => {
+            if (err) {
+              LoggerCore.error(String(err));
+              client.emit("RouterConfig", { error: String(err) });
+            }
+            client.emit("RouterConfig", {
+              success: true,
+              data: JSON.parse(data).applications
+            });
+          });
+          this.gateList.push({ ...nodeInfo, status: 1 });
+          LoggerCore.majorinfo(
+            'Gate Node "' + nodeInfo.id + '" registered successfully'
+          );
+        }
+      });
+    });
+
     this.webServer.listen(Number(this.config.port), () => {
-      LoggerCore.majorinfo(`RegisterCenter Server has been started. listening port ${this.config.port}`);
+      LoggerCore.majorinfo(
+        `RegisterCenter Server has been started. listening port ${this.config.port}`
+      );
     });
   }
 

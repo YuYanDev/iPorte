@@ -4,14 +4,14 @@
   "description": "A Fast 🚀 and Lightweight🎽 API Gateway",
   "main": "main.js",
   "scripts": {
-    "gate": "echo 'To be continued...'",
+    "gate": "node build/gate/index.js",
     "rc": "node build/register-center/index.js",
     "dev:doc": "cd docs/source && gitbook serve --port 2333",
     "dev:gate": "nodemon scripts/dev-gate.js",
     "dev:rc": "nodemon scripts/dev-register-center.js",
     "dev:rcui": "cd packages/register-center-webui && node scripts/start.js ",
     "build:doc": "gitbook build docs/source docs/docs",
-    "build:gate": "echo 'To be continued...'",
+    "build:gate": "babel packages/gate -d build/gate --copy-files",
     "build:rc": "babel packages/register-center -d build/register-center --copy-files",
     "build:rcui": "cd packages/register-center-webui && node scripts/build.js "
   },
@@ -75,6 +75,7 @@
     "path": "^0.12.7",
     "redis": "^2.8.0",
     "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0",
     "toml": "^3.0.0"
   }
 }

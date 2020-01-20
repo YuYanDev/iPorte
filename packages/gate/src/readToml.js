@@ -1,6 +1,6 @@
 import fs from "fs";
 import toml from "toml";
-import { defaultConfig } from "../constants/index";
+import { defaultConfig } from "./constants";
 import Logger from "./logger";
 
 const loadConfigObjFromToml = filePath => {

@@ -1,0 +1,4 @@
+listen = 80
+NodeId = 'WDNMD'
+RegisterCenter = "http://localhost:8080"
+TrustToken = 'A31D78B11109A'

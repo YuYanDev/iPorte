@@ -9,8 +9,8 @@ export const SESSION_CONFIG = {
 };
 
 export const defaultConfig = {
-  info: 'default',
+  info: "default",
   port: 8080,
-  trusttoken: { broadcast: "A31D78B11109A" },
+  TrustToken: "A31D78B11109A",
   redis: { address: "localhost", port: 6379 }
 };
