@@ -34,7 +34,9 @@ npm run dev:rcui
 ```
 
 ##### 3.3 Develop Gate
-To be continued...
+``` bash
+npm run dev:gate
+```
 
 ##### 3.4 Modify document 
 ``` bash
@@ -58,7 +60,9 @@ npm run build:rc
 ```
 
 ##### 4.3 Build Gate
-To be continued...
+``` bash
+npm run build:gate
+```
 
 ##### 4.4 Build document 
 ``` bash

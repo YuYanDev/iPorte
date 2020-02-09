@@ -6,7 +6,7 @@ import { getUserInfo } from "../api/common";
 
 import Application from "./application";
 import Setting from "./setting";
-
+import Logo from "../img/logo.svg";
 const { Header, Content, Footer, Sider } = Layout;
 
 class App extends React.Component {
@@ -45,15 +45,22 @@ class App extends React.Component {
               defaultSelectedKeys={[this.props.navbarkey]}
               onClick={this.switchRouter}
             >
-              <div style={{ height: 36 }}>
+              <div style={{ height: 30, margin: "24px 0" }}>
                 <p
                   style={{
-                    marginTop: 36,
-                    fontSize: "200%",
+                    lineHeight: "26px",
+                    fontSize: "26px",
                     textAlign: "center"
                   }}
                 >
-                  IPorte
+                  <img src={Logo} height={30} />
+                  <span
+                    style={{
+                      marginLeft: "12px",
+                    }}
+                  >
+                    IPorte
+                  </span>
                 </p>
               </div>
               <Menu.Item key="application">
