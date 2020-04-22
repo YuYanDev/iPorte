@@ -27,7 +27,7 @@ var loadConfigObjFromToml = function loadConfigObjFromToml(filePath) {
         return;
       }
 
-      resolve(_toml.default.parse(data.toString()));
+      resolve(Object.assign(_index.defaultConfig, _toml.default.parse(data.toString())));
     });
   });
 };

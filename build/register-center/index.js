@@ -2,6 +2,8 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
@@ -10,9 +12,7 @@ var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/creat
 
 var _path = _interopRequireDefault(require("path"));
 
-var _http = _interopRequireDefault(require("http"));
-
-var _socket = _interopRequireDefault(require("socket.io"));
+var _koaSocket = _interopRequireDefault(require("koa-socket-2"));
 
 var _koa = _interopRequireDefault(require("koa"));
 
@@ -44,13 +44,14 @@ var _logger2 = _interopRequireDefault(require("./webservice/middleware/logger"))
 
 var _redisDB = _interopRequireDefault(require("./webservice/middleware/redisDB"));
 
+var _broadcast = _interopRequireDefault(require("./webservice/middleware/broadcast"));
+
 var _constants = require("./constants");
 
-// npm lib
-// common service
-// koa handler
-// koa middleware
-// constants
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
 var RegisterCenter =
 /*#__PURE__*/
 function () {
@@ -73,6 +74,7 @@ function () {
       this.webServiceRouter = null;
       this.config = null;
       this.db = null;
+      this.gateList = [];
     }
     /**
      * Read Register Center config from toml file
@@ -100,6 +102,14 @@ function () {
 
       this.db = (0, _startRedis.default)(this.config.redis);
     }
+  }, {
+    key: "broadcastRouterTable",
+    value: function broadcastRouterTable() {
+      console.log("xxxxx", this.socketService);
+      this.socketService.emit("UpdateRoute", {
+        msg: "bord"
+      });
+    }
     /**
      * load Web Service (Koa Server)
      */
@@ -107,44 +117,103 @@ function () {
   }, {
     key: "loadWebService",
     value: function loadWebService() {
+      var _this = this;
+
       _logger.default.majorinfo("Starting Web Service");
 
       this.webService = new _koa.default();
       this.webServiceRouter = new _koaRouter.default();
       this.webService.keys = ["WDNMD"];
+      var io = new _koaSocket.default();
+      io.attach(this.webService);
+      io.on("connect", function (client) {
+        client.on("message",
+        /*#__PURE__*/
+        function () {
+          var _ref = (0, _asyncToGenerator2.default)(function* (message) {
+            console.log(message);
+          });
+
+          return function (_x) {
+            return _ref.apply(this, arguments);
+          };
+        }());
+      });
+      io.on("registered",
+      /*#__PURE__*/
+      function () {
+        var _ref2 = (0, _asyncToGenerator2.default)(function* (ctx, msg) {
+          var data = ctx.data;
+
+          var nodeInfo = _objectSpread({}, data, {
+            clientId: Object.keys(ctx.socket.rooms)[0]
+          });
+
+          if (data && data.trustToken !== _this.config.TrustToken) {
+            _logger.default.warn("Handshake failed, keys do not match: " + JSON.stringify(nodeInfo));
+
+            io.to(nodeInfo.clientId).emit("rejection_token");
+          } else {
+            _logger.default.majorinfo("Received registration request from Gate Node: " + JSON.stringify(nodeInfo));
+
+            _this.db.get("IPorte_Applications", function (err, data) {
+              if (err) {
+                _logger.default.error(String(err));
+
+                io.to(nodeInfo.clientId).emit("RouterConfig", {
+                  error: String(err)
+                });
+              }
+
+              io.to(nodeInfo.clientId).emit("RouterConfig", {
+                success: true,
+                data: JSON.parse(data).applications
+              });
+            });
+
+            _this.gateList.push(_objectSpread({}, nodeInfo, {
+              status: 1
+            }));
+
+            _logger.default.majorinfo('Gate Node "' + nodeInfo.id + '" registered successfully');
+          }
+        });
+
+        return function (_x2, _x3) {
+          return _ref2.apply(this, arguments);
+        };
+      }());
+      io.on("updateConfig",
+      /*#__PURE__*/
+      function () {
+        var _ref3 = (0, _asyncToGenerator2.default)(function* (ctx, data) {
+          _logger.default.info("Updateing Config");
+
+          ctx.socket.broadcast.emit("UpdateRoute", {
+            data
+          });
+        });
+
+        return function (_x4, _x5) {
+          return _ref3.apply(this, arguments);
+        };
+      }());
       /** MiddleWare */
 
       this.webService.use((0, _koaBodyparser.default)());
       this.webService.use((0, _koaSession.default)(_constants.SESSION_CONFIG, this.webService));
       this.webService.use((0, _logger2.default)());
       this.webService.use((0, _redisDB.default)(this.db));
-      this.webService.use((0, _koaViews.default)(_path.default.join(__dirname, './webservice/view')));
+      this.webService.use((0, _koaViews.default)(_path.default.join(__dirname, "./webservice/view")));
       this.webService.use((0, _auth.default)());
-      this.webService.use((0, _koaMount.default)('/static', (0, _koaStatic.default)(_path.default.join(__dirname, './webservice/view/static/'))));
+      this.webService.use((0, _broadcast.default)());
+      this.webService.use((0, _koaMount.default)("/static", (0, _koaStatic.default)(_path.default.join(__dirname, "./webservice/view/static/"))));
       /** Handler | Router */
 
       this.webServiceRouter.use("/api", _api.default.routes(), _api.default.allowedMethods());
       this.webServiceRouter.use("/", _index.default.routes(), _index.default.allowedMethods());
       this.webService.use(this.webServiceRouter.routes()).use(this.webServiceRouter.allowedMethods());
-    }
-    /**
-     * load Web Server
-     * HTTP Server && Socket Server
-     */
-
-  }, {
-    key: "loadWebServer",
-    value: function loadWebServer() {
-      var _this = this;
-
-      this.webServer = _http.default.createServer(this.webService.callback());
-
-      _logger.default.majorinfo("Starting Socket Service");
-
-      this.socketService = (0, _socket.default)(this.webServer);
-      this.webServer.listen(Number(this.config.port), function () {
-        _logger.default.majorinfo("RegisterCenter Server has been started. listening port ".concat(_this.config.port));
-      });
+      this.webService.listen(Number(this.config.port));
     }
   }, {
     key: "start",
@@ -154,7 +223,6 @@ function () {
         yield this.loadRegisterCenterConfig();
         yield this.startRedisService();
         yield this.loadWebService();
-        yield this.loadWebServer();
       });
 
       function start() {

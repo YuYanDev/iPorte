@@ -1,4 +1,5 @@
 import axios from "axios";
+import { message } from 'antd';
 
 axios.defaults.headers["Content-Type"] = "application/json";
 axios.defaults.timeout = 5000;
@@ -18,10 +19,10 @@ class Ajax {
         this.destroy(url);
         // 业务状态码及URL校验
         if (data.code !== 200) {
-          let msg = data.message;
-          if (!msg) {
-            msg = "数据获取异常";
+          if(data.code === 401){
+            window.location.href = "/auth/login";
           }
+          message.error(data.message || 'Server Error');
         }
         return data;
       },

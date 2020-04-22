@@ -11,6 +11,8 @@ var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/de
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
+var _lodash = _interopRequireDefault(require("lodash"));
+
 var _koaRouter = _interopRequireDefault(require("koa-router"));
 
 var _koaJson = _interopRequireDefault(require("koa-json"));
@@ -55,12 +57,20 @@ api.get("/application/list",
 /*#__PURE__*/
 function () {
   var _ref3 = (0, _asyncToGenerator2.default)(function* (ctx) {
-    var data = yield (0, _applications.getApplicationsList)(ctx);
-    ctx.body = {
-      code: 200,
-      success: true,
-      data
-    };
+    try {
+      var data = yield (0, _applications.getApplicationsList)(ctx);
+      ctx.body = {
+        code: 200,
+        success: true,
+        data
+      };
+    } catch (e) {
+      ctx.body = {
+        code: 500,
+        success: false,
+        message: "Database Error"
+      };
+    }
   });
 
   return function (_x3) {
@@ -74,7 +84,6 @@ function () {
     var reqObj = ctx.request.body;
 
     if (!reqObj.name || !reqObj.domain) {
-      ctx.status = 400;
       ctx.body = {
         code: 400,
         success: false,
@@ -87,11 +96,10 @@ function () {
       var data = yield (0, _applications.getApplicationsList)(ctx);
 
       if (data) {
-        var newData = _.cloneDeep(data); // Check Domain Duplicates
+        var newData = _lodash.default.cloneDeep(data); // Check Domain Duplicates
 
 
         if ((0, _applications2.checkDomainDuplicates)(data.applications, reqObj.domain)) {
-          ctx.status = 400;
           ctx.body = {
             code: 400,
             success: false,
@@ -112,15 +120,14 @@ function () {
         newData.application_total = data.applications.length + 1;
         newData.application_incremental = data.application_incremental + 1;
         newData.applications.unshift(pushData);
-        yield (0, _applications.setApplicationsList)(ctx, newData); // TODO: Add Domain Broadcast
-
+        yield (0, _applications.setApplicationsList)(ctx, newData);
+        yield ctx.broadcast(newData);
         ctx.body = {
           code: 200,
           success: true,
           message: "add success"
         };
       } else {
-        ctx.status = 500;
         ctx.body = {
           code: 500,
           success: false,
@@ -128,7 +135,6 @@ function () {
         };
       }
     } catch (E) {
-      ctx.status = 500;
       ctx.body = {
         code: 500,
         success: false,
@@ -148,7 +154,6 @@ function () {
     var reqObj = ctx.request.body;
 
     if (!reqObj.id) {
-      ctx.status = 400;
       ctx.body = {
         code: 400,
         success: false,
@@ -161,19 +166,18 @@ function () {
       var data = yield (0, _applications.getApplicationsList)(ctx);
 
       if (data) {
-        var newData = _.cloneDeep(data);
+        var newData = _lodash.default.cloneDeep(data);
 
         var newApplicationData = (0, _applications2.changeApplicationInfoById)(newData, reqObj);
         newData.applications = newApplicationData;
-        yield (0, _applications.setApplicationsList)(ctx, newData); // TODO: edit Domain Broadcast
-
+        yield (0, _applications.setApplicationsList)(ctx, newData);
+        yield ctx.broadcast(newData);
         ctx.body = {
           code: 200,
           success: true,
           message: "edit success"
         };
       } else {
-        ctx.status = 500;
         ctx.body = {
           code: 500,
           success: false,
@@ -181,7 +185,6 @@ function () {
         };
       }
     } catch (E) {
-      ctx.status = 500;
       ctx.body = {
         code: 500,
         success: false,
@@ -201,7 +204,6 @@ function () {
     var reqObj = ctx.request.body;
 
     if (!reqObj.id || !(reqObj.status === 1 || reqObj.status === 0)) {
-      ctx.status = 400;
       ctx.body = {
         code: 400,
         success: false,
@@ -214,19 +216,18 @@ function () {
       var data = yield (0, _applications.getApplicationsList)(ctx);
 
       if (data) {
-        var newData = _.cloneDeep(data);
+        var newData = _lodash.default.cloneDeep(data);
 
         var newApplicationData = (0, _applications2.changeApplicationStatusById)(newData, reqObj.id, reqObj.status);
         newData.applications = newApplicationData;
-        yield (0, _applications.setApplicationsList)(ctx, newData); // TODO: updown Domain Broadcast
-
+        yield (0, _applications.setApplicationsList)(ctx, newData);
+        yield ctx.broadcast(newData);
         ctx.body = {
           code: 200,
           success: true,
           message: "changestatus success"
         };
       } else {
-        ctx.status = 500;
         ctx.body = {
           code: 500,
           success: false,
@@ -234,7 +235,6 @@ function () {
         };
       }
     } catch (E) {
-      ctx.status = 500;
       ctx.body = {
         code: 500,
         success: false,
@@ -254,7 +254,6 @@ function () {
     var reqObj = ctx.request.body;
 
     if (!reqObj.id) {
-      ctx.status = 400;
       ctx.body = {
         code: 400,
         success: false,
@@ -267,20 +266,19 @@ function () {
       var data = yield (0, _applications.getApplicationsList)(ctx);
 
       if (data) {
-        var newData = _.cloneDeep(data);
+        var newData = _lodash.default.cloneDeep(data);
 
         var newApplicationData = (0, _applications2.deleteApplicationById)(newData, reqObj.id);
         newData.applications = newApplicationData;
         newData.application_total = data.application_total - 1;
-        yield (0, _applications.setApplicationsList)(ctx, newData); // TODO: updown Domain Broadcast
-
+        yield (0, _applications.setApplicationsList)(ctx, newData);
+        yield ctx.broadcast(newData);
         ctx.body = {
           code: 200,
           success: true,
           message: "delete success"
         };
       } else {
-        ctx.status = 500;
         ctx.body = {
           code: 500,
           success: false,
@@ -288,7 +286,6 @@ function () {
         };
       }
     } catch (E) {
-      ctx.status = 500;
       ctx.body = {
         code: 500,
         success: false,
@@ -305,60 +302,169 @@ api.post("/application/:id/addrule",
 /*#__PURE__*/
 function () {
   var _ref8 = (0, _asyncToGenerator2.default)(function* (ctx) {
-    ctx.body = {
-      code: 200,
-      success: true,
-      message: "/application/id/addrule"
-    };
+    var pid = ctx.params.id;
+    var reqObj = ctx.request.body;
+
+    if (!reqObj.name || !reqObj.suffix || !reqObj.target) {
+      ctx.body = {
+        code: 400,
+        success: false,
+        message: "Field is missing"
+      };
+      return;
+    }
+
+    try {
+      var data = yield (0, _applications.getApplicationsList)(ctx);
+
+      if (data) {
+        var newData = _lodash.default.cloneDeep(data);
+
+        var safeData = _lodash.default.cloneDeep(data);
+
+        var domainObj = data.applications.find(function (x) {
+          return x.id === Number(pid);
+        });
+
+        if (domainObj === undefined) {
+          throw "domian not found";
+        }
+
+        newData.applications = safeData.applications.map(function (e) {
+          if (e.id === Number(pid)) {
+            var isRepeat = e.rule.find(function (x) {
+              return x.suffix === reqObj.suffix;
+            });
+
+            if (isRepeat !== undefined) {
+              throw "rule is repeat";
+            }
+
+            var newRuleElement = {
+              id: e.rule.length + 1,
+              name: reqObj.name,
+              suffix: reqObj.suffix,
+              status: 1,
+              rewrite: true,
+              rewrite_rule: "^",
+              type: "Reverse Proxy",
+              target: reqObj.target
+            };
+
+            var newDomainElement = _objectSpread({}, e, {
+              rule_incremental_statistics: e.rule_incremental_statistics + 1,
+              rule_total: e.rule_total + 1
+            });
+
+            newDomainElement.rule.unshift(newRuleElement);
+            return newDomainElement;
+          } else {
+            return e;
+          }
+        });
+        yield (0, _applications.setApplicationsList)(ctx, newData);
+        yield ctx.broadcast(newData);
+        ctx.body = {
+          code: 200,
+          success: true,
+          message: "add rule success"
+        };
+      } else {
+        ctx.body = {
+          code: 500,
+          success: false,
+          message: "Database error"
+        };
+      }
+    } catch (e) {
+      ctx.body = {
+        code: 500,
+        success: false,
+        message: String(e)
+      };
+    }
   });
 
   return function (_x8) {
     return _ref8.apply(this, arguments);
   };
 }());
-api.post("/application/changerulestatus",
+api.post("/application/:id/deleterule",
 /*#__PURE__*/
 function () {
   var _ref9 = (0, _asyncToGenerator2.default)(function* (ctx) {
-    ctx.body = {
-      code: 200,
-      success: true,
-      message: "/application/changerulestatus"
-    };
+    var pid = ctx.params.id;
+    var reqObj = ctx.request.body;
+
+    if (!reqObj.id) {
+      ctx.body = {
+        code: 400,
+        success: false,
+        message: "Field is missing"
+      };
+      return;
+    }
+
+    try {
+      var data = yield (0, _applications.getApplicationsList)(ctx);
+
+      if (data) {
+        var newData = _lodash.default.cloneDeep(data);
+
+        var safeData = _lodash.default.cloneDeep(data);
+
+        var domainObj = data.applications.find(function (x) {
+          return x.id === Number(pid);
+        });
+
+        if (domainObj === undefined) {
+          throw "domian not found";
+        }
+
+        newData.applications = safeData.applications.map(function (e) {
+          if (e.id === Number(pid)) {
+            var newRule = [];
+            e.rule.forEach(function (element) {
+              if (element.id !== reqObj.id) {
+                newRule.push(element);
+              }
+            });
+
+            var newApplication = _objectSpread({}, e, {
+              rule: newRule,
+              rule_total: newRule.length
+            });
+
+            return newApplication;
+          } else {
+            return e;
+          }
+        });
+        yield (0, _applications.setApplicationsList)(ctx, newData);
+        yield ctx.broadcast(newData);
+        ctx.body = {
+          code: 200,
+          success: true,
+          message: "/application/:id/deleterule"
+        };
+      } else {
+        ctx.body = {
+          code: 500,
+          success: false,
+          message: "Database error"
+        };
+      }
+    } catch (e) {
+      ctx.body = {
+        code: 500,
+        success: false,
+        message: String(e)
+      };
+    }
   });
 
   return function (_x9) {
     return _ref9.apply(this, arguments);
-  };
-}());
-api.post("/application/:id/editrule",
-/*#__PURE__*/
-function () {
-  var _ref10 = (0, _asyncToGenerator2.default)(function* (ctx) {
-    ctx.body = {
-      code: 200,
-      success: true,
-      message: "/application/id/editrule"
-    };
-  });
-
-  return function (_x10) {
-    return _ref10.apply(this, arguments);
-  };
-}());
-api.post("/application/:id/deleterule",
-/*#__PURE__*/
-function () {
-  var _ref11 = (0, _asyncToGenerator2.default)(function* (ctx) {
-    ctx.body = {
-      code: 200,
-      success: true,
-      message: "/application/:id/deleterule"
-    };
-  });
-
-  return function (_x11) {
-    return _ref11.apply(this, arguments);
   };
 }());
 var _default = api;

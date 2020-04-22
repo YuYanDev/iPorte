@@ -22,11 +22,9 @@ var SESSION_CONFIG = {
 };
 exports.SESSION_CONFIG = SESSION_CONFIG;
 var defaultConfig = {
-  info: 'default',
+  info: "default",
   port: 8080,
-  trusttoken: {
-    broadcast: "A31D78B11109A"
-  },
+  TrustToken: "A31D78B11109A",
   redis: {
     address: "localhost",
     port: 6379

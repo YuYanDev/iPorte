@@ -1,16 +1,25 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Table, Button, Badge, message, Modal } from "antd";
-import { getApplicationList, deleteApplicationById } from "../../api/application";
+import {
+  getApplicationList,
+  addApplication,
+  changeApplicationStatusById,
+  deleteApplicationById,
+  addApplicationRuleById,
+  deleteApplicationRuleById,
+} from "../../api/application";
+import AddDomain from "./components/add-domain";
+import AddRule from "./components/add-rule";
 
 class Application extends React.Component {
   statusBadgeHashMap = {
     0: "error",
-    1: "success"
+    1: "success",
   };
   statusTextHashMap = {
     0: "Stoped",
-    1: "Running"
+    1: "Running",
   };
 
   getDomainListColumns() {
@@ -20,24 +29,24 @@ class Application extends React.Component {
         title: lang["application.table.head.domain_id"],
         dataIndex: "id",
         key: "id",
-        width: 100
+        width: 100,
       },
       {
         title: lang["application.table.head.name"],
         dataIndex: "name",
         key: "name",
-        width: 150
+        width: 150,
       },
       {
         title: lang["application.table.head.domain"],
         dataIndex: "domain",
         key: "domain",
-        width: 200
+        width: 200,
       },
       {
         title: lang["application.table.head.rule_count"],
         key: "rule",
-        render: (text, record) => <span>{record.rule.length}</span>
+        render: (text, record) => <span>{record.rule.length}</span>,
       },
       {
         title: lang["application.table.head.status"],
@@ -49,7 +58,7 @@ class Application extends React.Component {
             <Badge status={this.statusBadgeHashMap[text]} />
             {this.statusTextHashMap[text]}
           </span>
-        )
+        ),
       },
       {
         title: lang["application.table.head.domain_operate"],
@@ -58,11 +67,15 @@ class Application extends React.Component {
         align: "right",
         render: (text, record) => (
           <span>
-            <a onClick={() => this.handleAddAndEditRuleModalOpen("add")}>
+            <a
+              onClick={() =>
+                this.handleAddAndEditRuleModalOpen("add", record.id)
+              }
+            >
               {lang["application.table.add_rule"]}
             </a>
             {" | "}
-            <a
+            {/* <a
               className="warn-text"
               onClick={() =>
                 this.handleAddAndEditDomainModalOpen("edit", record.id, record)
@@ -70,14 +83,21 @@ class Application extends React.Component {
             >
               {lang["common.text.modify"]}
             </a>
-            {" | "}
+            {" | "} */}
             <a
               className="warn-text"
               onClick={() =>
-                this.handleStopModalOpen("domain", record.id, record.name)
+                this.handleStopModalOpen(
+                  "domain",
+                  record.id,
+                  record.name,
+                  record.status
+                )
               }
             >
-              {lang["common.text.stop"]}
+              {record.status === 1
+                ? lang["common.text.stop"]
+                : lang["common.text.start"]}
             </a>
             {" | "}
             <a
@@ -89,59 +109,54 @@ class Application extends React.Component {
               {lang["common.text.drop"]}
             </a>
           </span>
-        )
-      }
+        ),
+      },
     ];
   }
 
-  getForwardListColumns() {
+  getForwardListColumns(pid) {
     const lang = this.props.lang;
     return [
       {
         title: lang["application.table.head.rule_id"],
         dataIndex: "id",
         key: "id",
-        width: 100
+        width: 100,
       },
       {
         title: lang["application.table.head.rule_name"],
         dataIndex: "name",
         key: "name",
-        width: 150
+        width: 150,
       },
       {
         title: lang["application.table.head.suffix"],
         dataIndex: "suffix",
         key: "suffix",
-        width: 200
+        width: 200,
       },
       {
         title: lang["application.table.head.type"],
         dataIndex: "type",
-        key: "type"
-      },
-      {
-        title: lang["application.table.head.rewrite"],
-        key: "rewrite",
-        render: (text, record) => (record.rewrite ? record.rewrite_rule : "-")
+        key: "type",
       },
       {
         title: lang["application.table.head.target"],
         key: "target",
-        dataIndex: "target"
+        dataIndex: "target",
       },
-      {
-        title: lang["application.table.head.status"],
-        key: "status",
-        dataIndex: "status",
-        width: 150,
-        render: (text, record) => (
-          <span>
-            <Badge status={this.statusBadgeHashMap[text]} />
-            {this.statusTextHashMap[text]}
-          </span>
-        )
-      },
+      // {
+      //   title: lang["application.table.head.status"],
+      //   key: "status",
+      //   dataIndex: "status",
+      //   width: 150,
+      //   render: (text, record) => (
+      //     <span>
+      //       <Badge status={this.statusBadgeHashMap[text]} />
+      //       {this.statusTextHashMap[text]}
+      //     </span>
+      //   )
+      // },
       {
         title: lang["application.table.head.rule_operate"],
         key: "action",
@@ -149,7 +164,7 @@ class Application extends React.Component {
         align: "right",
         render: (text, record) => (
           <span>
-            <a
+            {/* <a
               className="warn-text"
               onClick={() =>
                 this.handleAddAndEditRuleModalOpen("edit", record.id, record)
@@ -166,18 +181,18 @@ class Application extends React.Component {
             >
               {lang["common.text.stop"]}
             </a>
-            {" | "}
+            {" | "} */}
             <a
               className="error-text"
               onClick={() =>
-                this.handleDropModalOpen("rule", record.id, record.name)
+                this.handleDropModalOpen("rule", record.id, record.name, pid)
               }
             >
               {lang["common.text.drop"]}
             </a>
           </span>
-        )
-      }
+        ),
+      },
     ];
   }
 
@@ -191,6 +206,7 @@ class Application extends React.Component {
     /* add and edit domain rule state */
     addAndEditRuleModalVisible: false,
     addAndEditRuleModalType: "add",
+    addAndEditRuleModalFatherId: null,
     addAndEditRuleModalId: null,
     addAndEditRuleModalData: {},
     /* stop domain or rule model state */
@@ -198,36 +214,50 @@ class Application extends React.Component {
     stopModalType: "domain",
     stopModalTypeId: null,
     stopModalTypeName: "",
+    stopModalTypeStatus: null,
     /* drop domain or rule model state */
     dropModalVisible: false,
     dropModalType: "domain",
     dropModalTypeId: null,
-    dropModalTypeName: ""
+    dropModalTypePid: null,
+    dropModalTypeName: "",
   };
 
   /**
    * add and edit domain model functions
    */
+  addDomainRef = (ref) => {
+    this.addDomainDom = ref;
+  };
   handleAddAndEditDomainModalOpen = (type, id, data) => {
     if (type === "edit") {
       this.setState({
         addAndEditDomainModalVisible: true,
         addAndEditDomainModalType: "edit",
         addAndEditDomainModalId: id,
-        addAndEditDomainModalData: data
+        addAndEditDomainModalData: data,
       });
     } else {
       this.setState({
         addAndEditDomainModalVisible: true,
         addAndEditDomainModalType: "add",
         addAndEditDomainModalId: null,
-        addAndEditDomainModalData: {}
+        addAndEditDomainModalData: {},
       });
     }
   };
 
   handleAddAndEditDomainModalOk = () => {
-    this.handleAddAndEditDomainModalCancel();
+    const submitData = this.addDomainDom.submit();
+    addApplication(submitData)
+      .then(() => {
+        this.handleAddAndEditDomainModalCancel();
+        this.addDomainDom.clear();
+        this.fetchApplicationList();
+      })
+      .catch((e) => {
+        message.error(String(e));
+      });
   };
 
   handleAddAndEditDomainModalCancel = () => {
@@ -235,58 +265,90 @@ class Application extends React.Component {
       addAndEditDomainModalVisible: false,
       addAndEditDomainModalType: "add",
       addAndEditDomainModalId: null,
-      addAndEditDomainModalData: {}
+      addAndEditDomainModalData: {},
     });
   };
 
   /**
    * add and edit rule model functions
    */
-  handleAddAndEditRuleModalOpen = (type, id, data) => {
+  addRuleRef = (ref) => {
+    this.addRuleDom = ref;
+  };
+  handleAddAndEditRuleModalOpen = (type, pid, id, data) => {
     if (type === "edit") {
       this.setState({
         addAndEditRuleModalVisible: true,
         addAndEditRuleModalType: "edit",
+        addAndEditRuleModalFatherId: pid,
         addAndEditRuleModalId: id,
-        addAndEditRuleModalData: data
+        addAndEditRuleModalData: data,
       });
     } else {
       this.setState({
         addAndEditRuleModalVisible: true,
         addAndEditRuleModalType: "add",
+        addAndEditRuleModalFatherId: pid,
         addAndEditRuleModalId: null,
-        addAndEditRuleModalData: {}
+        addAndEditRuleModalData: {},
       });
     }
   };
 
   handleAddAndEditRuleModalOk = () => {
-    this.handleAddAndEditRuleModalCancel();
+    const submitData = this.addRuleDom.submit();
+    const { addAndEditRuleModalFatherId } = this.state;
+    addApplicationRuleById(submitData, addAndEditRuleModalFatherId)
+      .then(() => {
+        this.fetchApplicationList();
+        this.handleAddAndEditRuleModalCancel();
+        this.addRuleDom.clear();
+      })
+      .catch((e) => {
+        message.error(String(e));
+      });
   };
 
   handleAddAndEditRuleModalCancel = () => {
     this.setState({
       addAndEditRuleModalVisible: false,
       addAndEditRuleModalType: "add",
+      addAndEditRuleModalFatherId: null,
       addAndEditRuleModalId: null,
-      addAndEditRuleModalData: {}
+      addAndEditRuleModalData: {},
     });
   };
 
   /**
    * stop domain or rule model functions
    */
-  handleStopModalOpen = (type, id, name) => {
+  handleStopModalOpen = (type, id, name, status) => {
     this.setState({
       stopModalVisible: true,
       stopModalType: type,
       stopModalTypeId: id,
-      stopModalTypeName: name
+      stopModalTypeName: name,
+      stopModalTypeStatus: status,
     });
   };
 
   handleStopModalOk = () => {
-    this.handleStopModalCancel();
+    const { lang } = this.props;
+    const { stopModalTypeStatus, stopModalTypeId } = this.state;
+    const newStatus = stopModalTypeStatus === 1 ? 0 : 1;
+    changeApplicationStatusById({ status: newStatus, id: stopModalTypeId })
+      .then((res) => {
+        message.success(
+          newStatus === 1
+            ? lang["application.common.start_domain_success"]
+            : lang["application.common.stop_domain_success"]
+        );
+        this.fetchApplicationList();
+        this.handleStopModalCancel();
+      })
+      .catch((e) => {
+        message.error(String(e));
+      });
   };
 
   handleStopModalCancel = () => {
@@ -294,36 +356,58 @@ class Application extends React.Component {
       stopModalVisible: false,
       stopModalType: "domain",
       stopModalTypeId: null,
-      stopModalTypeName: ""
+      stopModalTypeName: "",
+      stopModalTypeStatus: null,
     });
   };
 
   /**
    * drop domain or rule model functions
    */
-  handleDropModalOpen = (type, id, name) => {
+  handleDropModalOpen = (type, id, name, pid) => {
     this.setState({
       dropModalVisible: true,
       dropModalType: type,
       dropModalTypeId: id,
-      dropModalTypeName: name
+      dropModalTypePid: pid,
+      dropModalTypeName: name,
     });
   };
 
   handleDropModalOk = () => {
-    if(this.state.dropModalType === "domain"){
-      deleteApplicationById({id:this.state.dropModalTypeId}).then(()=>{
-        message.success(this.props.lang["application.common.drop_domain_success"])
-      }).catch(()=>{
-        message.error(this.props.lang["application.common.drop_domain_unsuccess"])
-      })
+    if (this.state.dropModalType === "domain") {
+      deleteApplicationById({ id: this.state.dropModalTypeId })
+        .then(() => {
+          message.success(
+            this.props.lang["application.common.drop_domain_success"]
+          );
+          this.fetchApplicationList();
+          this.handleDropModalCancel();
+        })
+        .catch(() => {
+          message.error(
+            this.props.lang["application.common.drop_domain_unsuccess"]
+          );
+        });
     }
-    if(this.state.dropModalType === "rule"){
-      console.log('rul',this.state.dropModalTypeId)
-      message.success(this.props.lang["application.common.drop_rule_success"])
+    if (this.state.dropModalType === "rule") {
+      deleteApplicationRuleById(
+        { id: this.state.dropModalTypeId },
+        this.state.dropModalTypePid
+      )
+        .then((res) => {
+          message.success(
+            this.props.lang["application.common.drop_rule_success"]
+          );
+          this.fetchApplicationList();
+          this.handleDropModalCancel();
+        })
+        .catch((e) => {
+          message.error(
+            this.props.lang["application.common.drop_rule_unsuccess"]
+          );
+        });
     }
-    // deleteApplicationById
-    this.handleDropModalCancel();
   };
 
   handleDropModalCancel = () => {
@@ -331,7 +415,8 @@ class Application extends React.Component {
       dropModalVisible: false,
       dropModalType: "domain",
       dropModalTypeId: null,
-      dropModalTypeName: ""
+      dropModalTypePid: null,
+      dropModalTypeName: "",
     });
   };
 
@@ -347,10 +432,10 @@ class Application extends React.Component {
     this.fetchApplicationList();
   }
 
-  domainChildTable = data => {
+  domainChildTable = (data) => {
     return (
       <Table
-        columns={this.getForwardListColumns()}
+        columns={this.getForwardListColumns(data.id)}
         dataSource={data.rule}
         pagination={false}
       />
@@ -398,9 +483,11 @@ class Application extends React.Component {
               onClick={this.handleAddAndEditDomainModalOk}
             >
               {lang["common.text.submit"]}
-            </Button>
+            </Button>,
           ]}
-        ></Modal>
+        >
+          <AddDomain onRef={this.addDomainRef} />
+        </Modal>
         {/**
          * add/edit rule modal
          */}
@@ -423,9 +510,11 @@ class Application extends React.Component {
               onClick={this.handleAddAndEditRuleModalOk}
             >
               {lang["common.text.submit"]}
-            </Button>
+            </Button>,
           ]}
-        ></Modal>
+        >
+          <AddRule onRef={this.addRuleRef} />
+        </Modal>
         {/**
          * stop modal
          */}
@@ -445,12 +534,16 @@ class Application extends React.Component {
               style={{ borderColor: "#faad14", color: "#faad14" }}
             >
               {lang["common.text.confirm"]}
-            </Button>
+            </Button>,
           ]}
         >
           {this.state.stopModalType === "domain"
-            ? lang["application.common.stop_domain"]
-            : lang["application.common.stop_rule"]}
+            ? this.state.stopModalTypeStatus === 1
+              ? lang["application.common.stop_domain"]
+              : lang["application.common.start_domain"]
+            : this.state.stopModalTypeStatus === 1
+            ? lang["application.common.stop_rule"]
+            : lang["application.common.start_rule"]}
         </Modal>
         {/**
          * drop modal
@@ -471,7 +564,7 @@ class Application extends React.Component {
               style={{ borderColor: "#f5222d", color: "#f5222d" }}
             >
               {lang["common.text.confirm"]}
-            </Button>
+            </Button>,
           ]}
         >
           {this.state.dropModalType === "domain"
@@ -483,9 +576,9 @@ class Application extends React.Component {
   }
 }
 
-const mapStateToProps = store => {
+const mapStateToProps = (store) => {
   return {
-    lang: store.lang
+    lang: store.lang,
   };
 };
 
