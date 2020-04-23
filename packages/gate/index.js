@@ -65,7 +65,7 @@ class Gate {
 
     this.socketClient.on("RouterConfig", async routerConfig => {
       Logger.info("Receive the configuration sent from the registry");
-      console.log("routerTable", JSON.stringify(routerConfig.data));
+      // console.log("routerTable", JSON.stringify(routerConfig.data));
       this.routingTable = routerConfig.data;
     });
 

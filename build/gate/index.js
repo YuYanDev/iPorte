@@ -114,9 +114,9 @@ function () {
       /*#__PURE__*/
       function () {
         var _ref3 = (0, _asyncToGenerator2.default)(function* (routerConfig) {
-          _logger.default.info("Receive the configuration sent from the registry");
+          _logger.default.info("Receive the configuration sent from the registry"); // console.log("routerTable", JSON.stringify(routerConfig.data));
 
-          console.log("routerTable", JSON.stringify(routerConfig.data));
+
           _this.routingTable = routerConfig.data;
         });
 

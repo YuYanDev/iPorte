@@ -11,8 +11,8 @@
     "dev:rc": "nodemon scripts/dev-register-center.js",
     "dev:rcui": "cd packages/register-center-webui && node scripts/start.js ",
     "build:doc": "gitbook build docs/source docs/docs",
-    "build:gate": "babel packages/gate -d build/gate --copy-files",
-    "build:rc": "babel packages/register-center -d build/register-center --copy-files",
+    "build:gate": "rm -rf build/gate && babel packages/gate -d build/gate --copy-files",
+    "build:rc": "rm -rf build/register-center && babel packages/register-center -d build/register-center --copy-files",
     "build:rcui": "cd packages/register-center-webui && node scripts/build.js "
   },
   "repository": {
