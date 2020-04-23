@@ -42,6 +42,7 @@ class RegisterCenter {
     this.config = null;
     this.db = null;
     this.gateList = [];
+    this.updateKey = Math.random().toString(36).slice(-8);
   }
 
   /**
@@ -59,11 +60,6 @@ class RegisterCenter {
     this.db = startRedis(this.config.redis);
   }
 
-  broadcastRouterTable() {
-    console.log("xxxxx", this.socketService);
-    this.socketService.emit("UpdateRoute", { msg: "bord" });
-  }
-
   /**
    * load Web Service (Koa Server)
    */
@@ -73,6 +69,7 @@ class RegisterCenter {
     this.webServiceRouter = new Router();
     this.webService.keys = ["WDNMD"];
 
+    /** Socket Service */
     const io = new IO();
     io.attach(this.webService);
     io.on("connect", (client) => {
@@ -117,9 +114,12 @@ class RegisterCenter {
       }
     });
 
-    io.on("updateConfig", async (ctx, data) => {
-      LoggerCore.info("Updateing Config");
-      ctx.socket.broadcast.emit("UpdateRoute", { data });
+    io.on("updateConfig", async (ctx, msg) => {
+      const { key, data } = msg;
+      if (key === this.updateKey) {
+        LoggerCore.info("Updateing Config");
+        ctx.socket.broadcast.emit("UpdateRoute", { data });
+      }
     });
 
     /** MiddleWare */
@@ -129,7 +129,7 @@ class RegisterCenter {
     this.webService.use(RedisDBMiddleWare(this.db));
     this.webService.use(Views(path.join(__dirname, "./webservice/view")));
     this.webService.use(Auth());
-    this.webService.use(BroadcastMiddleWare(this.config.port));
+    this.webService.use(BroadcastMiddleWare(this.config.port, this.updateKey));
     this.webService.use(
       Mount(
         "/static",
