@@ -14,13 +14,14 @@ var _socket = _interopRequireDefault(require("socket.io-client"));
 var _logger = _interopRequireDefault(require("../../service/logger"));
 
 var Broadcast = function Broadcast() {
+  var port = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 8080;
   return (
     /*#__PURE__*/
     function () {
       var _ref = (0, _asyncToGenerator2.default)(function* (ctx, next) {
         var broadcast = function broadcast(data) {
           return new Promise(function (resolve) {
-            var client = (0, _socket.default)("http://localhost:8080", {});
+            var client = (0, _socket.default)("http://127.0.0.1:".concat(port), {});
             client.on("connect", function () {
               client.emit("updateConfig", data);
 

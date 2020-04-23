@@ -54,7 +54,8 @@ class Gate {
 
     this.socketClient.on("UpdateRoute", async message => {
       Logger.info("New version of routing table received");
-      this.routingTable = message.data;
+      const { applications = [] } = message.data
+      this.routingTable = applications;
     });
 
     this.socketClient.on("rejection_token", async msg => {

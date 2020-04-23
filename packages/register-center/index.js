@@ -129,7 +129,7 @@ class RegisterCenter {
     this.webService.use(RedisDBMiddleWare(this.db));
     this.webService.use(Views(path.join(__dirname, "./webservice/view")));
     this.webService.use(Auth());
-    this.webService.use(BroadcastMiddleWare());
+    this.webService.use(BroadcastMiddleWare(this.config.port));
     this.webService.use(
       Mount(
         "/static",

@@ -206,7 +206,7 @@ function () {
       this.webService.use((0, _redisDB.default)(this.db));
       this.webService.use((0, _koaViews.default)(_path.default.join(__dirname, "./webservice/view")));
       this.webService.use((0, _auth.default)());
-      this.webService.use((0, _broadcast.default)());
+      this.webService.use((0, _broadcast.default)(this.config.port));
       this.webService.use((0, _koaMount.default)("/static", (0, _koaStatic.default)(_path.default.join(__dirname, "./webservice/view/static/"))));
       /** Handler | Router */
 

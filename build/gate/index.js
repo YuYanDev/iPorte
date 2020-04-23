@@ -87,7 +87,10 @@ function () {
         var _ref = (0, _asyncToGenerator2.default)(function* (message) {
           _logger.default.info("New version of routing table received");
 
-          _this.routingTable = message.data;
+          var {
+            applications = []
+          } = message.data;
+          _this.routingTable = applications;
         });
 
         return function (_x) {
